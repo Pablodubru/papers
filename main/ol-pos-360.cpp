@@ -54,9 +54,9 @@ int main(){
 
 
     //set velocity and aceleration (rads/s)
-    m1.SetupPositionMode(10,10);
-    m2.SetupPositionMode(10,10);
-    m3.SetupPositionMode(10,10);
+    m1.SetupPositionMode(1,1);
+    m2.SetupPositionMode(1,1);
+    m3.SetupPositionMode(1,1);
 
     //
 
@@ -84,16 +84,16 @@ int main(){
 
     for (double t=0;t<2*dts;t+=dts)
     {
-        cout <<"t: "<<t << endl;
-        cout <<"target1: "<<targetAngle1;
-        cout <<", target2: "<<targetAngle2;
-        cout <<", target3: "<<targetAngle3<<endl;
-        cout <<"pos1:    "<<m1.GetPosition();
-        cout <<", pos2: "<<m2.GetPosition();
-        cout <<", pos3: "<<m3.GetPosition()<<endl;
-        cout << "orient: "<<orient<<" incl: "<<incli<<endl;
+//        cout <<"t: "<<t << endl;
+//        cout <<"target1: "<<targetAngle1;
+//        cout <<", target2: "<<targetAngle2;
+//        cout <<", target3: "<<targetAngle3<<endl;
+//        cout <<"pos1:    "<<m1.GetPosition();
+//        cout <<", pos2: "<<m2.GetPosition();
+//        cout <<", pos3: "<<m3.GetPosition()<<endl;
+//        cout << "orient: "<<orient<<" incl: "<<incli<<endl;
         tilt.readSensor(incSensor,oriSensor);
-//        cout << "incli_sen: " << incSensor << " , orient_sen: " << oriSensor << endl;
+        cout << "incli_sen: " << incSensor << " , orient_sen: " << oriSensor << endl;
         graph << t << " , " << targetAngle1 << " , " << m1.GetPosition() << " , " << targetAngle2 << " , " << m2.GetPosition() << " , " << targetAngle3 << " , " << m3.GetPosition() << " , " << incli << " , " << incSensor << " , " << orient << " , " << oriSensor <<endl;
 
         Ts.WaitSamplingTime();
