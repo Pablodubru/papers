@@ -1,4 +1,4 @@
-project(demos)
+project(papers)
 
 cmake_minimum_required(VERSION 2.8)
 
