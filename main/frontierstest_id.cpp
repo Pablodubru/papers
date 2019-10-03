@@ -108,67 +108,25 @@ int main ()
   double radius=0.01; //winch radius
   GeoInkinematics neck_ik(0.052,0.052,l0); //kinematics geometric
   vector<double> lengths(3);
-  incli=1;
+
+  double targetAngle1, targetAngle2, targetAngle3;
+
+  incli=10;
   neck_ik.GetIK(incli,0,lengths);
-  m1.SetPosition((lg0-lengths[0])/radius);
-  m2.SetPosition((lg0-lengths[1])/radius);
-  m3.SetPosition((lg0-lengths[2])/radius);
-//  cout << "lgts0: " << (lg0-lengths[2])/radius << endl;
+  targetAngle1=(lg0-lengths[0])/radius;//*180/(0.01*M_PI);
+  targetAngle2=(lg0-lengths[1])/radius;//*180/(0.01*M_PI);
+  targetAngle3=(lg0-lengths[2])/radius;//*180/(0.01*M_PI);
+
+
+
 
   double interval=5; //in seconds
   for (double t=0;t<interval; t+=dts)
   {
-/*
 
-      torque=0.01+t*0.01;
-      m1.SetTorque(torque);
-
-      if (tilt.readSensor(incSensor,oriSensor) <0)
-      {
-          cout << "Sensor error! " << endl;
-          //Due to sensor error set motors zero velocity.
-          m1.SetVelocity(0);
-          m2.SetVelocity(0);
-          m3.SetVelocity(0);
-
-      }
-      else
-      {
-          model.UpdateSystem(torque, incSensor);
-
-          cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
-      }
-
-      model.PrintZTransferFunction(dts);
-      model.GetZTransferFunction(num,den);
-      Ts.WaitSamplingTime();
-
-//      cout << "matlab G=tf([ " << idNum.back() ;
-      data << t;
-      for (int i=num.size()-1; i>=0; i--)
-      {
-          data << ", " << num[i];
-      }
-//      cout << "],[ " << idDen.back();
-      for (int i=den.size()-1; i>=0; i--)
-      {
-          data << ", " << den[i];
-
-      }
-      data << endl;
-  }
-
-
-  sleep(2);
-
-  m1.SetTorque(0);
-  m2.SetTorque(0);
-  m3.SetTorque(0);
-
-  */
-
-
-
+      m1.SetPosition(targetAngle1+0.01*((rand() % 10 + 1)-5));
+      m2.SetPosition(targetAngle2+0.01*((rand() % 10 + 1)-5));
+      m3.SetPosition(targetAngle3+0.01*((rand() % 10 + 1)-5));
 
       if (tilt.readSensor(incSensor,oriSensor) <0)
       {
@@ -204,7 +162,7 @@ int main ()
   m1.SetPosition(0);
   m2.SetPosition(0);
   m3.SetPosition(0);
-  sleep (1);
+  sleep (3);
 
   data.close();
 
