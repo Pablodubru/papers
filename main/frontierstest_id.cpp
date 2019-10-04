@@ -49,7 +49,7 @@ int main ()
 
   //m1 setup
   SocketCanPort pm31("can1");
-  CiA402SetupData sd31(2048,24,0.001, 0.144);
+  CiA402SetupData sd31(2*2048,3.7,0.001, 1.1);
   CiA402Device m1 (1, &pm31, &sd31);
   m1.Reset();
   m1.SwitchOn();
@@ -59,7 +59,7 @@ int main ()
 
   //m2
   SocketCanPort pm2("can1");
-  CiA402SetupData sd32(2048,24,0.001, 0.144);
+  CiA402SetupData sd32(2*2048,3.7,0.001, 1.1);
   CiA402Device m2 (2, &pm2, &sd32);
   m2.Reset();
   m2.SwitchOn();
@@ -70,7 +70,7 @@ int main ()
 
   //m3
   SocketCanPort pm3("can1");
-  CiA402SetupData sd33(2048,24,0.001, 0.144);
+  CiA402SetupData sd33(2*2048,3.7,0.001, 1.1);
   CiA402Device m3 (3, &pm3, &sd33);
   m3.Reset();
   m3.SwitchOn();
@@ -96,7 +96,7 @@ int main ()
 //  m1.SetTorque(0.01);
 //  m2.SetTorque(0.01);
 //  m3.SetTorque(0.01);
-  double torque,incli;
+  double torque,incli,orien;
 
   vector<double> num(numOrder+1),den(denOrder+1); //(order 0 also counts)
 
@@ -111,22 +111,26 @@ int main ()
 
   double targetAngle1, targetAngle2, targetAngle3;
 
-  incli=10;
-  neck_ik.GetIK(incli,0,lengths);
-  targetAngle1=(lg0-lengths[0])/radius;//*180/(0.01*M_PI);
-  targetAngle2=(lg0-lengths[1])/radius;//*180/(0.01*M_PI);
-  targetAngle3=(lg0-lengths[2])/radius;//*180/(0.01*M_PI);
 
 
 
 
-  double interval=5; //in seconds
+
+  double interval=10; //in seconds
   for (double t=0;t<interval; t+=dts)
   {
 
-      m1.SetPosition(targetAngle1+0.01*((rand() % 10 + 1)-5));
-      m2.SetPosition(targetAngle2+0.01*((rand() % 10 + 1)-5));
-      m3.SetPosition(targetAngle3+0.01*((rand() % 10 + 1)-5));
+      incli=10+t+0.1*((rand() % 10 + 1)-5);
+      orien=10*t+0.1*((rand() % 10 + 1)-5);
+
+      neck_ik.GetIK(incli,orien,lengths);
+      targetAngle1=(lg0-lengths[0])/radius;//*180/(0.01*M_PI);
+      targetAngle2=(lg0-lengths[1])/radius;//*180/(0.01*M_PI);
+      targetAngle3=(lg0-lengths[2])/radius;//*180/(0.01*M_PI);
+
+      m1.SetPosition(targetAngle1);
+      m2.SetPosition(targetAngle2);
+      m3.SetPosition(targetAngle3);
 
       if (tilt.readSensor(incSensor,oriSensor) <0)
       {
@@ -162,8 +166,11 @@ int main ()
   m1.SetPosition(0);
   m2.SetPosition(0);
   m3.SetPosition(0);
+  sleep (1);
+  m1.SetPosition(0);
+  m2.SetPosition(0);
+  m3.SetPosition(0);
   sleep (3);
-
   data.close();
 
 
