@@ -53,7 +53,7 @@ int main ()
   CiA402Device m1 (1, &pm31, &sd31);
   m1.Reset();
   m1.SwitchOn();
-    m1.SetupPositionMode(1,1);
+    m1.SetupPositionMode(10,10);
 //  m1.Setup_Velocity_Mode(5);
 //  m1.Setup_Torque_Mode();
 
@@ -63,7 +63,7 @@ int main ()
   CiA402Device m2 (2, &pm2, &sd32);
   m2.Reset();
   m2.SwitchOn();
-    m2.SetupPositionMode(1,1);
+    m2.SetupPositionMode(10,10);
 //  m2.Setup_Velocity_Mode(5);
 //  m2.Setup_Torque_Mode();
 
@@ -74,7 +74,7 @@ int main ()
   CiA402Device m3 (3, &pm3, &sd33);
   m3.Reset();
   m3.SwitchOn();
-    m3.SetupPositionMode(1,1);
+    m3.SetupPositionMode(10,10);
 //  m3.Setup_Velocity_Mode(5);
 //  m3.Setup_Torque_Mode();
 
@@ -113,15 +113,12 @@ int main ()
 
 
 
-
-
-
+  //populate system matrices
   double interval=10; //in seconds
   for (double t=0;t<interval; t+=dts)
   {
-
-      incli=10+t+0.1*((rand() % 10 + 1)-5);
-      orien=10*t+0.1*((rand() % 10 + 1)-5);
+      incli=0.1*((rand() % 10 + 1)-5);
+      orien=0;
 
       neck_ik.GetIK(incli,orien,lengths);
       targetAngle1=(lg0-lengths[0])/radius;//*180/(0.01*M_PI);
@@ -142,6 +139,42 @@ int main ()
       {
           model.UpdateSystem(incli, incSensor);
           cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
+      }
+      Ts.WaitSamplingTime();
+
+
+  }
+
+
+  interval=10; //in seconds
+  for (double t=0;t<interval; t+=dts)
+  {
+
+      incli=3*t+0.1*((rand() % 10 + 1)-5);
+      orien=0;
+
+      neck_ik.GetIK(incli,orien,lengths);
+      targetAngle1=(lg0-lengths[0])/radius;//*180/(0.01*M_PI);
+      targetAngle2=(lg0-lengths[1])/radius;//*180/(0.01*M_PI);
+      targetAngle3=(lg0-lengths[2])/radius;//*180/(0.01*M_PI);
+
+      m1.SetPosition(targetAngle1);
+      m2.SetPosition(targetAngle2);
+      m3.SetPosition(targetAngle3);
+
+      if (tilt.readSensor(incSensor,oriSensor) <0)
+      {
+          cout << "Sensor error! ";
+          cout << "Sensor error! ";
+
+          //Due to sensor error set motors zero velocity.
+          cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
+
+      }
+      else
+      {
+          model.UpdateSystem(incli, incSensor);
+//          cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
       }
 
       model.PrintZTransferFunction(dts);
