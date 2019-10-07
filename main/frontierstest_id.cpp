@@ -29,7 +29,7 @@ int main ()
   ofstream data("../ids.csv",std::ofstream::out);
 
   //Samplinfg time
-  double dts=0.02;
+  double dts=0.025;
   SamplingTime Ts(dts);
 
   //tau = 0.1
@@ -39,7 +39,7 @@ int main ()
   SystemBlock filter(0.09516,0,- 0.9048,1);
 
   int numOrder=0,denOrder=1;
-  OnlineSystemIdentification model(numOrder, denOrder, filter, 0.98, 0.8 );
+  OnlineSystemIdentification model(numOrder, denOrder);//, filter, 0.98, 0.8 );
   SystemBlock sys;
   FPDBlock con(1,1,1,dts);
   PIDBlock intcon(0.1,0.01,0,dts);
@@ -117,7 +117,7 @@ int main ()
   double interval=10; //in seconds
   for (double t=0;t<interval; t+=dts)
   {
-      incli=0.1*((rand() % 10 + 1)-5);
+      incli=0.01*((rand() % 10 + 1)-5);
       orien=0;
 
       neck_ik.GetIK(incli,orien,lengths);
@@ -131,26 +131,25 @@ int main ()
 
       if (tilt.readSensor(incSensor,oriSensor) <0)
       {
-          cout << "Sensor error! " << endl;
+          cout << "Sensor error! " ;
           //Due to sensor error set motors zero velocity.
+          cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
 
       }
-      else
-      {
-          model.UpdateSystem(incli, incSensor);
-          cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
-      }
+
+      model.UpdateSystem(incli, incSensor);
+
       Ts.WaitSamplingTime();
 
 
   }
 
 
-  interval=10; //in seconds
+  interval=20; //in seconds
   for (double t=0;t<interval; t+=dts)
   {
 
-      incli=3*t+0.1*((rand() % 10 + 1)-5);
+      incli=(1*t)+0.01*((rand() % 10 + 1)-5);
       orien=0;
 
       neck_ik.GetIK(incli,orien,lengths);
@@ -165,19 +164,16 @@ int main ()
       if (tilt.readSensor(incSensor,oriSensor) <0)
       {
           cout << "Sensor error! ";
-          cout << "Sensor error! ";
-
           //Due to sensor error set motors zero velocity.
           cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
 
       }
-      else
-      {
-          model.UpdateSystem(incli, incSensor);
-//          cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
-      }
 
-      model.PrintZTransferFunction(dts);
+          model.UpdateSystem(incli, incSensor);
+          cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
+
+
+//      model.PrintZTransferFunction(dts);
       model.GetZTransferFunction(num,den);
       Ts.WaitSamplingTime();
 
