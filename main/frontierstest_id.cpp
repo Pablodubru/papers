@@ -26,7 +26,7 @@ int main ()
   float incSensor,oriSensor;
 //    sleep(4); //wait for sensor
 
-  ofstream data("../ids.csv",std::ofstream::out);
+  ofstream data("/home/humasoft/code/papers/graficas/test2/ids900.csv",std::ofstream::out);
 
   //Samplinfg time
   double dts=0.025;
