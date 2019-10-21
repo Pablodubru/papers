@@ -33,7 +33,7 @@ int main ()
 
 
 
-  FPDBlock con(0,0.9636125,-0.89,dts); //(kp,kd,exp,dts) 0.0214437
+  FPDBlock con(0.27,1.492,-0.9,dts); //(kp,kd,exp,dts) 0.0214437
   FPDBlock reset(con); //Used for control reset
 //  PIDBlock con(0,1,0,dts);
 
