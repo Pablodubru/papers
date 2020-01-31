@@ -23,7 +23,7 @@ int main ()
 {
     //--sensor--
     SerialArduino tilt;
-    float incSensor,oriSensor;
+    double incSensor,oriSensor;
 //    sleep(4); //wait for sensor
 
     ofstream data("/home/humasoft/code/graficas/graficas_demos/clinc20degs-400g.csv",std::ofstream::out); // /home/humasoft/code/graficas

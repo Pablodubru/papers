@@ -15,7 +15,7 @@ int main(){
 
     //--sensor--
     SerialArduino tilt;
-    float incSensor,oriSensor;
+    double incSensor,oriSensor;
     ofstream graph("/home/humasoft/code/graficas/graficas_demos/ol-pos-360-000g.csv",std::ofstream::out);
 
 
