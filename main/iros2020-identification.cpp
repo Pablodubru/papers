@@ -54,11 +54,18 @@ int main(int argc, char *argv[])
         cout << "t: "<< t << ", pos: " << +3*sin(5*t) << endl;
         Ts.WaitSamplingTime();
         if (tilt.readSensor(incSensor,oriSensor) <0){}
-            cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
 
-            data << t << ", "  << isignal << ", " << incSensor << ", " << oriSensor << endl;
+        cout<<"Read position: "<<m2.GetPosition()<<", vel: "<<m2.GetVelocity()
+            <<" and those amps:"<<m2.GetFilterdAmps()<<endl;
+
+        cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
+
+        data << t << ", "  << isignal << ", "<< m2.GetPosition() <<", "<< m2.GetVelocity()
+             <<", "<< m2.GetFilterdAmps() <<", "<<  incSensor << ", " << oriSensor << endl;
+
 
     }
+     m2.SwitchOff();
 
 
     return 0;
