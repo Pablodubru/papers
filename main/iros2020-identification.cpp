@@ -1,15 +1,18 @@
+#include "SensorIntegration.h"
 
 
 #include <iostream>
-#include <math.h>
-
-#include "TestPort.h"
-#include "CanBusPort.h"
+#include <fstream>
 #include "Cia402device.h"
-#include "CiA301CommPort.h"
 #include "SocketCanPort.h"
+
+#include "math.h"
+
 #include "fcontrol.h"
-#include "SensorIntegration.h"
+#include "IPlot.h"
+#include "OnlineSystemIdentification.h"
+
+#include "Kinematics.h"
 
 
 
@@ -18,44 +21,42 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 
-    ///prepare ports
-    /// Open a port address with a PortBase Object
-    //TestPort port;
-    //CanBusPort port;
-    SocketCanPort p1("can1");
-
-
-    ///Then instantiate a 301 communications object for that address
-    //CiA301CommPort coms(port.getPortFileDescriptor());
-
-    ///Create a joint and give a canopen id, and a 301port (by constructor)
-    CiA402Device m1(32,&p1);
-
     ///--sensor tilt--
     SerialArduino tilt;
     double incSensor,oriSensor;
 
+    //m2
+    SocketCanPort pm2("can1");
+    CiA402SetupData sd32(2*2048,3.7,0.001, 1.1);
+    CiA402Device m2 (32, &pm2, &sd32);
+    m2.Reset();
+    m2.SwitchOn();
+    m2.SetupPositionMode(200,200);
 
-    if (tilt.readSensor(incSensor,oriSensor) <0){}
-    while(true)
-        cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
+    ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/ids900.csv",std::ofstream::out);
 
 
-    m1.SetupPositionMode(200,200);
-//    m1.Setup_Velocity_Mode(0,360);
-//    m1.Setup_Torque_Mode();
 
-
-    double dts=0.01;
+    double dts=0.02;
     SamplingTime Ts(dts);
+
+    double psr = 0.0, isignal = 0.0;
 
 
 
     for(double t=dts;t<10;t=t+dts)
     {
-        m1.SetPosition(3+3*sin(5*t));
+        // sinusoidal + pseudorandom
+        psr = 0.01*((rand() % 10)-5);
+        isignal = 3+3*sin(5*t);
+        m2.SetPosition(isignal+psr);
+
         cout << "t: "<< t << ", pos: " << +3*sin(5*t) << endl;
         Ts.WaitSamplingTime();
+        if (tilt.readSensor(incSensor,oriSensor) <0){}
+            cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
+
+            data << t << ", "  << isignal << ", " << incSensor << ", " << oriSensor << endl;
 
     }
 
