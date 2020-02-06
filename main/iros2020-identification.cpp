@@ -44,13 +44,13 @@ int main(int argc, char *argv[])
 
 
 
-    for(double t=dts;t<10;t=t+dts)
+    for(double t=dts;t<1000;t=t+dts)
     {
         // sinusoidal + pseudorandom
         psr = 0.01*((rand() % 10)-5);
         isignal = 3+3*sin(5*t);
-//        m2.SetPosition(isignal+psr);
-        m2.SetPosition(0);
+           m2.SetPosition(isignal+psr);
+        //m2.SetPosition(0);
         cout << "t: "<< t << ", pos: " << +3*sin(5*t) << endl;
         Ts.WaitSamplingTime();
         if (tilt.readSensor(incSensor,oriSensor) <0){}
