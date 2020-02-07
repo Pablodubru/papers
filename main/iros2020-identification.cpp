@@ -47,8 +47,9 @@ int main(int argc, char *argv[])
     for(double t=dts;t<1000;t=t+dts)
     {
         // sinusoidal + pseudorandom
-        psr = 0.01*((rand() % 10)-5);
-        isignal = 3+3*sin(5*t);
+        psr = 0.1*((rand() % 10)-5);
+        isignal = abs(3+2*sin(t)+sin(2.3*t+5)+sin(t/2.22 +12));
+        if(isignal>6) isignal=6;
            m2.SetPosition(isignal+psr);
         //m2.SetPosition(0);
         cout << "t: "<< t << ", pos: " << +3*sin(5*t) << endl;
@@ -60,7 +61,7 @@ int main(int argc, char *argv[])
 
         cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
 
-        data << t << ", "  << isignal << ", "<< m2.GetPosition() <<", "<< m2.GetVelocity()
+        data << t << ", "  << isignal+psr << ", "<< m2.GetPosition() <<", "<< m2.GetVelocity()
              <<", "<< m2.GetAmps() <<", "<<  incSensor << ", " << oriSensor << endl;
 
 
