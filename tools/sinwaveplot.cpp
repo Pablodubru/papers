@@ -13,10 +13,10 @@ int main(){
     for(double t=dts;t<1000;t=t+dts)
     {
         // sinusoidal + pseudorandom
-        psr = 0.1*((rand() % 10)-5);
-        isignal = abs(3+2*sin(t)+sin(2.3*t+5)+sin(t/2.22 +12));
+
+        isignal = abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67));
         if(isignal>6) isignal=6;
-        in=psr+isignal;
+        in=isignal;
         data << in  << "\n";
     }
 

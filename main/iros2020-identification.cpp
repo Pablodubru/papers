@@ -29,6 +29,7 @@ void chirpident(){
     m2.Reset();
     m2.SwitchOn();
     m2.SetupPositionMode(200,200);
+    sleep(1);
 
     ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/chirp.csv",std::ofstream::out);
 
@@ -40,18 +41,17 @@ void chirpident(){
     SamplingTime Ts(dts);
 
     double psr = 0.0, isignal = 0.0;
-
+    cout<<"ISitRAD or DEGREES"<<sin(1)<<endl;
 
 
     for(double t=dts;t<1000;t=t+dts)
     {
         // sinusoidal + pseudorandom
-        f=f+1;
-        isignal = (3+2*sin(f*t));
-        if(isignal>6) isignal=6;
-           m2.SetPosition(isignal);
+        f=f+0.002;
+        isignal = (5+4*sin(f*t));
+        m2.SetPosition(isignal);
         //m2.SetPosition(0);
-        cout << "t: "<< t << ", pos: " << +3*sin(5*t) << endl;
+        cout << "t: "<< t << ", pos: " << isignal << endl;
         Ts.WaitSamplingTime();
         if (tilt.readSensor(incSensor,oriSensor) <0){}
 
@@ -98,7 +98,7 @@ void capturaDatos(){
     {
         // sinusoidal + pseudorandom
         psr = 0.1*((rand() % 10)-5);
-        isignal = abs(3+2*sin(t)+sin(2.3*t+5)+sin(t/2.22 +12));
+        isignal = abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67));
         if(isignal>6) isignal=6;
            m2.SetPosition(isignal+psr);
         //m2.SetPosition(0);
@@ -162,8 +162,7 @@ void moveincl(double Inclination,SerialArduino& ArduinoSensor,CiA402Device& Moto
 
 int main(int argc, char *argv[])
 {
-
-
+    capturaDatos();
 
     ///--sensor tilt--
     SerialArduino tilt;
