@@ -90,28 +90,25 @@ void capturaDatos(){
     double dts=0.02;
     SamplingTime Ts(dts);
 
-    double psr = 0.0, isignal = 0.0;
+    double isignal = 0.0;
 
 
 
     for(double t=dts;t<1000;t=t+dts)
     {
-        // sinusoidal + pseudorandom
-        psr = 0.1*((rand() % 10)-5);
+        // sinusoidal + pseudorando                                                                                  m
         isignal = abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67));
         if(isignal>6) isignal=6;
-           m2.SetPosition(isignal+psr);
+           m2.SetPosition(isignal);
         //m2.SetPosition(0);
         cout << "t: "<< t << ", pos: " << +3*sin(5*t) << endl;
         Ts.WaitSamplingTime();
         if (tilt.readSensor(incSensor,oriSensor) <0){}
-
         cout<<"Read position: "<<m2.GetPosition()<<", vel: "<<m2.GetVelocity()
             <<" and those amps:"<<m2.GetAmps()<<endl;
-
         cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
 
-        data << t << ", "  << isignal+psr << ", "<< m2.GetPosition() <<", "<< m2.GetVelocity()
+        data << t << ", "  << isignal << ", "<< m2.GetPosition() <<", "<< m2.GetVelocity()
              <<", "<< m2.GetAmps() <<", "<<  incSensor << ", " << oriSensor << endl;
 
 
@@ -120,7 +117,8 @@ void capturaDatos(){
 
 }
 
-void moveincl(double Inclination,SerialArduino& ArduinoSensor,CiA402Device& Motor, ofstream& WriteFile,ofstream& WriteFile2, double samplingTime){
+void moveincl(double Inclination,SerialArduino& ArduinoSensor,CiA402Device& Motor, ofstream& WriteFile,ofstream& WriteFile2, double samplingTime,double totalTime){
+
 
 
     ///--identification--
@@ -133,7 +131,7 @@ void moveincl(double Inclination,SerialArduino& ArduinoSensor,CiA402Device& Moto
     double psr = 0.0, cs= 0;
     double incSensor,oriSensor;
     if (ArduinoSensor.readSensor(incSensor,oriSensor) <0){}
-    for(double t=samplingTime;t<1000;t=t+samplingTime){
+    for(double t=samplingTime;t<totalTime;t=t+samplingTime){
 
          psr=0.01*((rand() % 10)-5);
          cs = Inclination+psr-incSensor;
@@ -159,11 +157,7 @@ void moveincl(double Inclination,SerialArduino& ArduinoSensor,CiA402Device& Moto
      Motor.SetVelocity(0);
      Motor.SwitchOff();
 }
-
-int main(int argc, char *argv[])
-{
-
-
+void moveinclInit(){
     ///--sensor tilt--
     SerialArduino tilt;
 
@@ -180,13 +174,19 @@ int main(int argc, char *argv[])
     for (int numiter=0;numiter<5;numiter++){
         ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSData"+to_string(InC+5*numiter)+".csv",std::ofstream::out);
         ofstream data2("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSPOL.csv",std::ofstream::out);
-        moveincl(InC,tilt,m2,data,data2,0.02);
+        moveincl(InC,tilt,m2,data,data2,0.02,1000);
         data.close();
         data2.close();
-        ofstream data3("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSData.csv",std::ofstream::out);
-        ofstream data4("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSPOL.csv",std::ofstream::out);
-        moveincl(0,tilt,m2,data,data2,0.02);
+        ofstream data3("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSDataignore.csv",std::ofstream::out);
+        ofstream data4("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSPOLignore.csv",std::ofstream::out);
+        moveincl(0,tilt,m2,data,data2,0.02,1);
         data3.close();
         data4.close();
     }
+}
+int main(int argc, char *argv[])
+{
+    capturaDatos();
+
+
 }
