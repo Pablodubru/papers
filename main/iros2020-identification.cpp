@@ -17,6 +17,58 @@
 
 
 using namespace std;
+void chirpident(){
+    ///--sensor tilt--
+    SerialArduino tilt;
+    double incSensor,oriSensor;
+
+    //m2
+    SocketCanPort pm2("can1");
+    CiA402SetupData sd32(2*2048,3.7,0.001, 1.1);
+    CiA402Device m2 (32, &pm2, &sd32);
+    m2.Reset();
+    m2.SwitchOn();
+    m2.SetupPositionMode(200,200);
+
+    ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/chirp.csv",std::ofstream::out);
+
+
+
+    double dts=0.02;
+    double f=0;
+
+    SamplingTime Ts(dts);
+
+    double psr = 0.0, isignal = 0.0;
+
+
+
+    for(double t=dts;t<1000;t=t+dts)
+    {
+        // sinusoidal + pseudorandom
+        f=f+1;
+        isignal = (3+2*sin(f*t));
+        if(isignal>6) isignal=6;
+           m2.SetPosition(isignal);
+        //m2.SetPosition(0);
+        cout << "t: "<< t << ", pos: " << +3*sin(5*t) << endl;
+        Ts.WaitSamplingTime();
+        if (tilt.readSensor(incSensor,oriSensor) <0){}
+
+        cout<<"Read position: "<<m2.GetPosition()<<", vel: "<<m2.GetVelocity()
+            <<" and those amps:"<<m2.GetAmps()<<endl;
+
+        cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
+
+        data << t << ", "  << isignal << ", "<< m2.GetPosition() <<", "<< m2.GetVelocity()
+             <<", "<< m2.GetAmps() <<", "<<  incSensor << ", " << oriSensor << endl;
+
+
+    }
+     m2.SwitchOff();
+
+
+}
 void capturaDatos(){
 
     ///--sensor tilt--
@@ -88,7 +140,7 @@ void moveincl(double Inclination,SerialArduino& ArduinoSensor,CiA402Device& Moto
          Gident.UpdateSystem(cs,incSensor);
          Motor.SetVelocity(cs);
          WriteFile<<t<<","<<Inclination+psr-incSensor<<",";
-         cout<<t<<","<<Inclination+psr-incSensor<<",";
+         cout<<t<<","<<(Inclination+psr-incSensor)<<",";
          Gident.GetZTransferFunction(numerator,denominator);
          for (auto &num : numerator){WriteFile2<<num<<",";}
          for (auto &den : denominator){WriteFile2<<den<<",";}
@@ -124,9 +176,18 @@ int main(int argc, char *argv[])
     m2.SwitchOn();
     m2.Setup_Velocity_Mode(200,200);
 
-    ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSData.csv",std::ofstream::out);
-    ofstream data2("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSPOL.csv",std::ofstream::out);
 
     double InC=15;
-    moveincl(InC,tilt,m2,data,data2,0.02);
+    for (int numiter=0;numiter<5;numiter++){
+        ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSData"+to_string(InC+5*numiter)+".csv",std::ofstream::out);
+        ofstream data2("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSPOL.csv",std::ofstream::out);
+        moveincl(InC,tilt,m2,data,data2,0.02);
+        data.close();
+        data2.close();
+        ofstream data3("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSData.csv",std::ofstream::out);
+        ofstream data4("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSPOL.csv",std::ofstream::out);
+        moveincl(0,tilt,m2,data,data2,0.02);
+        data3.close();
+        data4.close();
+    }
 }
