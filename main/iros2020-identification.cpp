@@ -116,7 +116,6 @@ void capturaDatos(){
      m2.SwitchOff();
 
 }
-
 void moveincl(double Inclination,SerialArduino& ArduinoSensor,CiA402Device& Motor, ofstream& WriteFile,ofstream& WriteFile2, double samplingTime,double totalTime){
 
 
@@ -147,15 +146,14 @@ void moveincl(double Inclination,SerialArduino& ArduinoSensor,CiA402Device& Moto
          Ts.WaitSamplingTime();
 
          if (ArduinoSensor.readSensor(incSensor,oriSensor) <0){}
-         WriteFile<<Motor.GetPosition()<<","<<Motor.GetVelocity()<<","<<Motor.GetAmps()<<","<<incSensor<<endl;
+         WriteFile<<Motor.GetPosition()<<","<<Motor.GetVelocity()<<","<<Motor.GetAmps()<<","<<incSensor<<","<<oriSensor<<endl;
          cout<<Motor.GetPosition()<<","<<Motor.GetVelocity()<<","<<Motor.GetAmps()<<","<<incSensor<<endl;
 
 
 
      }
 
-     Motor.SetVelocity(0);
-     Motor.SwitchOff();
+
 }
 void moveinclInit(){
     ///--sensor tilt--
@@ -170,11 +168,11 @@ void moveinclInit(){
     m2.Setup_Velocity_Mode(200,200);
 
 
-    double InC=15;
+    double InC=10;
     for (int numiter=0;numiter<5;numiter++){
         ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSData"+to_string(InC+5*numiter)+".csv",std::ofstream::out);
-        ofstream data2("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSPOL.csv",std::ofstream::out);
-        moveincl(InC,tilt,m2,data,data2,0.02,1000);
+        ofstream data2("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSPOL"+to_string(InC+5*numiter)+".csv",std::ofstream::out);
+        moveincl(InC+5*numiter,tilt,m2,data,data2,0.02,10);
         data.close();
         data2.close();
         ofstream data3("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSDataignore.csv",std::ofstream::out);
@@ -183,10 +181,11 @@ void moveinclInit(){
         data3.close();
         data4.close();
     }
+    m2.SetVelocity(0);
+    m2.SwitchOff();
 }
 int main(int argc, char *argv[])
 {
-    capturaDatos();
-
+    moveinclInit();
 
 }
