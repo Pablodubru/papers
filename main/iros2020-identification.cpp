@@ -162,7 +162,7 @@ void moveincl(double Inclination,SerialArduino& ArduinoSensor,CiA402Device& Moto
 
 int main(int argc, char *argv[])
 {
-    capturaDatos();
+
 
     ///--sensor tilt--
     SerialArduino tilt;
