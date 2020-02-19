@@ -186,6 +186,6 @@ void moveinclInit(){
 }
 int main(int argc, char *argv[])
 {
-    moveinclInit();
+    chirpident();
 
 }
