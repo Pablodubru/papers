@@ -83,7 +83,7 @@ void capturaDatos(){
     m2.SwitchOn();
     m2.Setup_Velocity_Mode(200,200);
 
-    ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/ids900.csv",std::ofstream::out);
+    ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/SetMembershipData.csv",std::ofstream::out);
 
 
 
