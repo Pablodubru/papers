@@ -81,7 +81,7 @@ void capturaDatos(){
     CiA402Device m2 (32, &pm2, &sd32);
     m2.Reset();
     m2.SwitchOn();
-    m2.SetupPositionMode(200,200);
+    m2.Setup_Velocity_Mode(200,200);
 
     ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/ids900.csv",std::ofstream::out);
 
@@ -91,17 +91,16 @@ void capturaDatos(){
     SamplingTime Ts(dts);
 
     double isignal = 0.0;
-
-
-
+    if (tilt.readSensor(incSensor,oriSensor) <0){}
     for(double t=dts;t<1000;t=t+dts)
     {
         // sinusoidal + pseudorando                                                                                  m
-        isignal = abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67));
-        if(isignal>6) isignal=6;
-           m2.SetPosition(isignal);
+        isignal = 2.5*(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))-incSensor;
+        //if(isignal>6) isignal=6;
+        m2.SetVelocity(isignal);
         //m2.SetPosition(0);
-        cout << "t: "<< t << ", pos: " << +3*sin(5*t) << endl;
+        cout << "t: "<< t << ", control signal: " << isignal << endl;
+        data << t << ", "  << isignal << ", "
         Ts.WaitSamplingTime();
         if (tilt.readSensor(incSensor,oriSensor) <0){}
         cout<<"Read position: "<<m2.GetPosition()<<", vel: "<<m2.GetVelocity()
@@ -110,8 +109,6 @@ void capturaDatos(){
 
         data << t << ", "  << isignal << ", "<< m2.GetPosition() <<", "<< m2.GetVelocity()
              <<", "<< m2.GetAmps() <<", "<<  incSensor << ", " << oriSensor << endl;
-
-
     }
      m2.SwitchOff();
 
