@@ -90,24 +90,24 @@ void capturaDatos(){
     double dts=0.02;
     SamplingTime Ts(dts);
 
-    double isignal = 0.0;
+    double isignal = 0.0, cs=0.0;
     if (tilt.readSensor(incSensor,oriSensor) <0){}
     for(double t=dts;t<1000;t=t+dts)
     {
         // sinusoidal + pseudorando                                                                                  m
-        isignal = 2.5*(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))-incSensor;
-        //if(isignal>6) isignal=6;
-        m2.SetVelocity(isignal);
+        isignal = 2.5*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67));
+        cs=isignal-incSensor;
+        m2.SetVelocity(cs);
         //m2.SetPosition(0);
-        cout << "t: "<< t << ", control signal: " << isignal << endl;
-        data << t << ", "  << isignal << ", "
+        cout << "t: "<< t << ", desaired  inclination: " << isignal << ", control signal: " << cs << endl;
+        data << t << ", "  << isignal << ", "  << cs << ", ";
         Ts.WaitSamplingTime();
         if (tilt.readSensor(incSensor,oriSensor) <0){}
         cout<<"Read position: "<<m2.GetPosition()<<", vel: "<<m2.GetVelocity()
             <<" and those amps:"<<m2.GetAmps()<<endl;
         cout << "Inc: " << incSensor << " ; Ori: "  << oriSensor << endl;
 
-        data << t << ", "  << isignal << ", "<< m2.GetPosition() <<", "<< m2.GetVelocity()
+        data << m2.GetPosition() <<", "<< m2.GetVelocity()
              <<", "<< m2.GetAmps() <<", "<<  incSensor << ", " << oriSensor << endl;
     }
      m2.SwitchOff();
@@ -183,6 +183,6 @@ void moveinclInit(){
 }
 int main(int argc, char *argv[])
 {
-    chirpident();
+    capturaDatos();
 
 }
