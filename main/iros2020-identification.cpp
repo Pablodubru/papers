@@ -119,7 +119,7 @@ void moveincl(double Inclination,SerialArduino& ArduinoSensor,CiA402Device& Moto
 
     ///--identification--
     ///
-    long numOrder=2, denOrder=2;
+    long numOrder=2, denOrder=3;
     vector<double>numerator,denominator;
     OnlineSystemIdentification Gident(numOrder,denOrder);
 
@@ -167,14 +167,14 @@ void moveinclInit(){
 
     double InC=10;
     for (int numiter=0;numiter<5;numiter++){
-        ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSData"+to_string(InC+5*numiter)+".csv",std::ofstream::out);
-        ofstream data2("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSPOL"+to_string(InC+5*numiter)+".csv",std::ofstream::out);
+        ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/ORDER23/RLSData"+to_string((int)InC+5*numiter)+".csv",std::ofstream::out);
+        ofstream data2("/home/humasoft/code/papers/graficas/Iros2020-Identification/ORDER23/RLSPOL"+to_string((int)InC+5*numiter)+".csv",std::ofstream::out);
         moveincl(InC+5*numiter,tilt,m2,data,data2,0.02,10);
         data.close();
         data2.close();
         ofstream data3("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSDataignore.csv",std::ofstream::out);
         ofstream data4("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSPOLignore.csv",std::ofstream::out);
-        moveincl(0,tilt,m2,data,data2,0.02,1);
+        moveincl(0,tilt,m2,data,data2,0.02,3);
         data3.close();
         data4.close();
     }
@@ -183,6 +183,6 @@ void moveinclInit(){
 }
 int main(int argc, char *argv[])
 {
-    capturaDatos();
+    moveinclInit ();
 
 }
