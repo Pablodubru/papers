@@ -1,16 +1,30 @@
 %pkg load 'control'
 
-data = load("RLSPOL20.000000.csv");
+data = load("RLSData10.000000.csv");
 
-orders=size(data,2);
-datasize=size(data,1);
-numorder=(orders-1)/2;
+np=2;nz=4;
 
-denorder=orders-numorder;
+N=400;
+N0=20;
+dts=data(1,1);
+fs=1/dts;
 
-num=data(datasize-50,1:numorder);
-den=data(datasize-50,numorder+1:orders);
+t=data(N0:N,1);
+in=data(N0:N,2);
+out=data(N0:N,3);
 
-Gz=tf(num,den,0.02);
-pzmap(Gz);
+plot(t,in);
+hold on;
+plot(t,out);
 %step(feedback(Gz,1));
+
+
+
+
+
+data = iddata(out,in,dts);
+sys = tfest(data,np,'Ts',dts);
+
+G=tf(sys.Numerator, sys.Denominator,dts)
+
+figure;pzmap(G);
