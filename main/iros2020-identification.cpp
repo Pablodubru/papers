@@ -119,7 +119,7 @@ void moveincl(double Inclination,SerialArduino& ArduinoSensor,CiA402Device& Moto
 
     ///--identification--
     ///
-    long numOrder=2, denOrder=3;
+    long numOrder=1, denOrder=1;
     vector<double>numerator,denominator;
     OnlineSystemIdentification Gident(numOrder,denOrder);
 
@@ -167,8 +167,8 @@ void moveinclInit(){
 
     double InC=10;
     for (int numiter=0;numiter<5;numiter++){
-        ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/ORDER23/RLSData"+to_string((int)InC+5*numiter)+".csv",std::ofstream::out);
-        ofstream data2("/home/humasoft/code/papers/graficas/Iros2020-Identification/ORDER23/RLSPOL"+to_string((int)InC+5*numiter)+".csv",std::ofstream::out);
+        ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/11/RLSData"+to_string((int)InC+5*numiter)+".csv",std::ofstream::out);
+        ofstream data2("/home/humasoft/code/papers/graficas/Iros2020-Identification/11/RLSPOL"+to_string((int)InC+5*numiter)+".csv",std::ofstream::out);
         moveincl(InC+5*numiter,tilt,m2,data,data2,0.02,10);
         data.close();
         data2.close();
