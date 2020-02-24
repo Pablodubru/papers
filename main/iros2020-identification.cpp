@@ -130,7 +130,7 @@ void moveincl(double Inclination,SerialArduino& ArduinoSensor,CiA402Device& Moto
     for(double t=samplingTime;t<totalTime;t=t+samplingTime){
 
          //psr=1*((rand() % 10)-5);
-         psr=sin(4*t);
+         psr=(sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/6;
          cs = Inclination+psr-incSensor;
          Gident.UpdateSystem(cs,incSensor);
          Motor.SetVelocity(cs);
