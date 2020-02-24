@@ -73,7 +73,7 @@ void capturaDatos(){
 
     ///--sensor tilt--
     SerialArduino tilt;
-    double incSensor,oriSensor;
+    double incSensor,lastincSensor, oriSensor;
 
     //m2
     SocketCanPort pm2("can1");
@@ -92,6 +92,7 @@ void capturaDatos(){
 
     double isignal = 0.0, cs=0.0;
     if (tilt.readSensor(incSensor,oriSensor) <0){}
+    lastincSensor=incSensor;
     for(double t=dts;t<1000;t=t+dts)
     {
         // sinusoidal + pseudorando                                                                                  m
@@ -100,7 +101,7 @@ void capturaDatos(){
         m2.SetVelocity(cs);
         //m2.SetPosition(0);
         cout << "t: "<< t << ", desaired  inclination: " << isignal << ", control signal: " << cs << endl;
-        data << t << ", "  << isignal << ", "  << cs << ", ";
+        data << t << ", "  << isignal << ", "  << cs << ", "<< incSensor-lastincSensor << ", ";
         Ts.WaitSamplingTime();
         if (tilt.readSensor(incSensor,oriSensor) <0){}
         cout<<"Read position: "<<m2.GetPosition()<<", vel: "<<m2.GetVelocity()
@@ -186,6 +187,6 @@ void moveinclInit(){
 }
 int main(int argc, char *argv[])
 {
-    moveinclInit ();
+    capturaDatos();
 
 }
