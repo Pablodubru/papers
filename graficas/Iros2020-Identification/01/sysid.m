@@ -13,7 +13,7 @@ fig=figure;
 hold on;
 leg=[];
 
-incs=[10 15 20 25 30];
+incs=[10 15 20 25 29];
 
 for i=incs
     
