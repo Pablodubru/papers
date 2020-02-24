@@ -166,10 +166,10 @@ void moveinclInit(){
 
 
     double InC=10;
-    for (int numiter=0;numiter<5;numiter++){
-        ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/02/RLSData"+to_string((int)InC+5*numiter)+".csv",std::ofstream::out);
-        ofstream data2("/home/humasoft/code/papers/graficas/Iros2020-Identification/02/RLSPOL"+to_string((int)InC+5*numiter)+".csv",std::ofstream::out);
-        moveincl(InC+5*numiter,tilt,m2,data,data2,0.02,10);
+    for (int numiter=0;numiter<20;numiter++){
+        ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/02/RLSData"+to_string((int)InC+numiter)+".csv",std::ofstream::out);
+        ofstream data2("/home/humasoft/code/papers/graficas/Iros2020-Identification/02/RLSPOL"+to_string((int)InC+numiter)+".csv",std::ofstream::out);
+        moveincl(InC+numiter,tilt,m2,data,data2,0.02,10);
         data.close();
         data2.close();
         ofstream data3("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLSDataignore.csv",std::ofstream::out);
