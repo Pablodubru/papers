@@ -72,7 +72,7 @@ figure(fnums);legend(folders);
 figure(fpoles);legend(folders);
 
 saveas(fnums,"gains.eps",'epsc');
-saveas(fpoles,"gains.eps",'epsc');
+saveas(fpoles,"poles.eps",'epsc');
 
 % fit = fittype('a*x + b*x^2'); 
 % fit1 = fit(incs,allnums,fit,'StartPoint',[1 1]);
