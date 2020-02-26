@@ -46,6 +46,9 @@ for i=1:size(incs,2)
     
 end
 
+<<<<<<< HEAD
+saveas(fig,'simrls.eps','epsc');
+=======
 legend("10","15","20","25","30",'Interpreter','latex','FontSize',12);
 xlabel("T(s)",'Interpreter','latex','FontSize',24); 
 ylabel("Inclination ($^{\circ}$)",'Interpreter','latex','FontSize',24);
@@ -57,3 +60,4 @@ saveas(gcf,"simrls.eps",'epsc');
 
 
 
+>>>>>>> 703d3e3dd800037895f0b2b42944a887275f98c3
