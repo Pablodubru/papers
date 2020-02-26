@@ -27,11 +27,11 @@ fig=figure;hold on;
 for i=1:size(incs,2)
     Gz=zpk([],rlspoles(i),rlsgains(i),dts);
 
-    %step(Gz);
+%     step(Gz);
 %         step(Gz*H);
 
-    step(incs(i)*feedback(Gz*H,1));
-    
+    y= step(5*feedback(Gz*H,1),0.02);
+    plot(y+incs(i));
     
 end
 

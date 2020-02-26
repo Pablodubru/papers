@@ -26,15 +26,18 @@ allnums=[];
 
 for i=incs
     file=[folders(f,:) '/RLSPOL' num2str(i) '.csv'];
+    ident = load(file);
+    
+     file=[folders(f,:) '/RLSData' num2str(i) '.csv'];
+    data = load(file);   
+    
 
-    data = load(file);
-
-    orders=size(data,2);
-    datasize=size(data,1);
+    orders=size(ident,2);
+    datasize=size(ident,1);
     numorder=1;
     denorder=2;
-    num=flip(  mean(data(datasize-50:datasize,1:numorder)) ,2);
-    den=flip(  mean(data(datasize-50:datasize,numorder+1:orders)) ,2);
+    num=flip(  mean(ident(datasize-50:datasize,1:numorder)) ,2);
+    den=flip(  mean(ident(datasize-50:datasize,numorder+1:orders)) ,2);
     
     if num(1)<0
         num=-num;
@@ -110,6 +113,6 @@ polyfit
 %             Linear model Poly1:
 %      fittedmodel3(x) = p1*x + p2
 %      Coefficients (with 95% confidence bounds):
-       gc1 =   ;   -0.059 % (-0.08923, -0.02877)
-       gc2 =    ;   1.857 % (1.243, 2.472)
+       gc1 =      -0.059; % (-0.08923, -0.02877)
+       gc2 =       1.857 ;% (1.243, 2.472)
 
