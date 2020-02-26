@@ -35,4 +35,9 @@ for i=1:size(incs,2)
     
 end
 
-saveas(fnums,"simrls.eps",'epsc');
+legend("10","15","20","25","30",'Interpreter','latex','FontSize',12);
+xlabel("T(s)",'Interpreter','latex','FontSize',24); 
+ylabel("Inclination ($^{\circ}$)",'Interpreter','latex','FontSize',24);
+title("Step response",'Interpreter','latex','FontSize',24);
+
+saveas(gcf,"simrls.eps",'epsc');

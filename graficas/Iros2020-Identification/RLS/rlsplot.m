@@ -68,8 +68,16 @@ figure(fnums);plot(incs,(allnums));
 figure(fpoles);plot(incs,(allpoles));
 
 end
-figure(fnums);legend(folders);
-figure(fpoles);legend(folders);
+figure(fnums);
+legend(folders,'Interpreter','latex','FontSize',12);
+xlabel("T(s)",'Interpreter','latex','FontSize',24); 
+ylabel("RELLENAR",'Interpreter','latex','FontSize',24);
+title("RELLENAR",'Interpreter','latex','FontSize',24);
+figure(fpoles);
+legend(folders,'Interpreter','latex','FontSize',12);
+xlabel("T(s)",'Interpreter','latex','FontSize',24); 
+ylabel("RELLENAR",'Interpreter','latex','FontSize',24);
+title("RELLENAR",'Interpreter','latex','FontSize',24);
 
 saveas(fnums,"gains.eps",'epsc');
 saveas(fpoles,"poles.eps",'epsc');
