@@ -26,15 +26,18 @@ allnums=[];
 
 for i=incs
     file=[folders(f,:) '/RLSPOL' num2str(i) '.csv'];
+    ident = load(file);
+    
+     file=[folders(f,:) '/RLSData' num2str(i) '.csv'];
+    data = load(file);   
+    
 
-    data = load(file);
-
-    orders=size(data,2);
-    datasize=size(data,1);
+    orders=size(ident,2);
+    datasize=size(ident,1);
     numorder=1;
     denorder=2;
-    num=flip(  mean(data(datasize-50:datasize,1:numorder)) ,2);
-    den=flip(  mean(data(datasize-50:datasize,numorder+1:orders)) ,2);
+    num=flip(  mean(ident(datasize-50:datasize,1:numorder)) ,2);
+    den=flip(  mean(ident(datasize-50:datasize,numorder+1:orders)) ,2);
     
     if num(1)<0
         num=-num;
@@ -68,8 +71,16 @@ figure(fnums);plot(incs,(allnums));
 figure(fpoles);plot(incs,(allpoles));
 
 end
-figure(fnums);legend(folders);
-figure(fpoles);legend(folders);
+figure(fnums);
+legend(folders,'Interpreter','latex','FontSize',12);
+xlabel("T(s)",'Interpreter','latex','FontSize',24); 
+ylabel("RELLENAR",'Interpreter','latex','FontSize',24);
+title("RELLENAR",'Interpreter','latex','FontSize',24);
+figure(fpoles);
+legend(folders,'Interpreter','latex','FontSize',12);
+xlabel("T(s)",'Interpreter','latex','FontSize',24); 
+ylabel("RELLENAR",'Interpreter','latex','FontSize',24);
+title("RELLENAR",'Interpreter','latex','FontSize',24);
 
 saveas(fnums,"gains.eps",'epsc');
 saveas(fpoles,"poles.eps",'epsc');
@@ -91,15 +102,17 @@ n3=fitnums(3,:);
 p3=fitpoles(3,:);
 
 
+polyfit
+
 %      Linear model Poly1:
 %      fittedmodel(x) = p1*x + p2
 %      Coefficients (with 95% confidence bounds):
-       pc1 =     0.01175  %(0.007117, 0.01639)
-       pc2 =     -0.4797  %(-0.5739, -0.3854)
+       pc1 =     0.01175 ; %(0.007117, 0.01639)
+       pc2 =     -0.4797 ; %(-0.5739, -0.3854)
        
 %             Linear model Poly1:
 %      fittedmodel3(x) = p1*x + p2
 %      Coefficients (with 95% confidence bounds):
-       gc1 =      -0.059 % (-0.08923, -0.02877)
-       gc2 =       1.857 % (1.243, 2.472)
+       gc1 =      -0.059; % (-0.08923, -0.02877)
+       gc2 =       1.857 ;% (1.243, 2.472)
 

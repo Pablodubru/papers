@@ -1,7 +1,7 @@
 %%%paper graph plots
-
+clear;
 %%% plot data
-incs=[ 10 15 20 25 30];
+incs=[ 5 15 25];
 dts=0.02;
 H=tf(dts*[1 0],[1 -1],dts);
 % H=c2d(tf([1],[ 1 0]),dts);
@@ -22,17 +22,42 @@ H=tf(dts*[1 0],[1 -1],dts);
 rlspoles=pc1*incs+pc2;
 rlsgains=gc1*incs+gc2;
 
+y=0;
 
 fig=figure;hold on;
 for i=1:size(incs,2)
-    Gz=zpk([],rlspoles(i),rlsgains(i),dts);
+    ys=[];
+    
+    for t=dts:dts:5
+        rlspoles=pc1*y+pc2;
+        rlsgains=gc1*y+gc2;
+        Gz=zpk([],rlspoles,rlsgains,dts);
 
-    %step(Gz);
+%     step(Gz);
 %         step(Gz*H);
 
-    step(incs(i)*feedback(Gz*H,1));
+    y= step((incs(i)-y)*feedback(Gz*H,1),dts);
+    y=y(2);
+    ys=[ys y];
+    end
     
+    plot(ys);
+
     
 end
 
+<<<<<<< HEAD
 saveas(fig,'simrls.eps','epsc');
+=======
+legend("10","15","20","25","30",'Interpreter','latex','FontSize',12);
+xlabel("T(s)",'Interpreter','latex','FontSize',24); 
+ylabel("Inclination ($^{\circ}$)",'Interpreter','latex','FontSize',24);
+title("Step response",'Interpreter','latex','FontSize',24);
+
+saveas(gcf,"simrls.eps",'epsc');
+
+
+
+
+
+>>>>>>> 703d3e3dd800037895f0b2b42944a887275f98c3
