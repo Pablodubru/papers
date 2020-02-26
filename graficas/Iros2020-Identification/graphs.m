@@ -1,7 +1,7 @@
 %%%paper graph plots
 clear;
 %%% plot data
-incs=[ 5 15 25];
+incs=[ 10 15 20 25];
 dts=0.02;
 H=tf(dts*[1 0],[1 -1],dts);
 % H=c2d(tf([1],[ 1 0]),dts);
@@ -26,26 +26,44 @@ y=0;
 
 ts=[];
     ys=[];
+    
+% %          Linear model Poly2:
+% %      fittedmodel(x) = p1*x^2 + p2*x + p3
+% %      Coefficients (with 95% confidence bounds):
+%        gc1 =    0.005339 % (-9.161e-05, 0.01077)
+%        gc2 =     -0.2672  %(-0.4808, -0.0536)
+%        gc3 =        3.71  %(1.742, 5.678)
 
+% %      Linear model Poly3:
+% %      fittedmodel(x) = p1*x^3 + p2*x^2 + p3*x + p4
+% %      Coefficients (with 95% confidence bounds):
+%        pc1 =   0.0001525 % (-1.929e-05, 0.0003243)
+%        pc2 =   -0.009225 % (-0.01931, 0.0008605)
+%        pc3 =      0.1885 % (-0.0002753, 0.3773)
+%        pc4 =      -1.539 % (-2.657, -0.4205)
+
+    expt=3;
 fig=figure;hold on;
 for i=1:size(incs,2)
     
-    for t=dts:dts:5
+    for t=dts:dts:expt
         rlspoles=pc1*y+pc2;
         rlsgains=gc1*y+gc2;
-        Gz=zpk([],rlspoles,rlsgains,dts);
-
+%         rlspoles=pc1*y^3+pc2*y^2+pc3*y+pc4;
+%         rlsgains=gc1*y^2+gc2*y+gc3;
+%         Gz=zpk([],rlspoles,rlsgains,dts);
+        Gz=tf([rlsgains],[1 rlspoles],dts);
         cs=incs(i)-y;
     %     step(Gz);
     %         step(Gz*H);
 
     %     y= step((incs(i)-y)*feedback(Gz*H,1),dts);
-    %     y=lsim(Gz,[y target],[0 dts]);
+%         v=lsim(Gz,[cs cs],[0 dts]);
         v = step(cs*Gz,dts);
         y = y+dts*v(2);
         y=y(1);
         ys=[ys y];
-        ts=[ts 5*(i-1)+t];
+        ts=[ts expt*(i-1)+t];
 
     end
 
@@ -61,19 +79,63 @@ plot(ts,ys);
 
 data = load('RLS/IDENT/RLSIDENTDatasteps.csv');
 
-plot(data(:,1),data(:,6));
+rout=data(1:size(ts,2),6) ;
+plot(ts,rout);
     
 
     
-
-% legend("10","15","20","25","30",'Interpreter','latex','FontSize',12);
-xlabel("T(s)",'Interpreter','latex','FontSize',24); 
-ylabel("Inclination ($^{\circ}$)",'Interpreter','latex','FontSize',24);
+legend("Model output","Real output",'Interpreter','latex','FontSize',12);
+% legend("10","15","20","25",'Interpreter','latex','FontSize',12);
+xlabel("Time(s)",'Interpreter','latex','FontSize',24); 
+ylabel("Inclination (deg)",'Interpreter','latex','FontSize',24);
 title("Step response",'Interpreter','latex','FontSize',24);
 
-saveas(fig,'simrls.eps','epsc');
+saveas(fig,'simsteps.eps','epsc');
+
+fig2=figure;hold on;
+
+expt=2;
+ts=[];ys=[];y=0;
+    for t=dts:dts:expt
+        rlspoles=pc1*y+pc2;
+        rlsgains=gc1*y+gc2;
+%         rlspoles=pc1*y^3+pc2*y^2+pc3*y+pc4;
+%         rlsgains=gc1*y^2+gc2*y+gc3;
+%         Gz=zpk([],rlspoles,rlsgains,dts);
+        Gz=tf([rlsgains],[1 rlspoles],dts);
+        cs=20-y;
+    %     step(Gz);
+    %         step(Gz*H);
+
+    %     y= step((incs(i)-y)*feedback(Gz*H,1),dts);
+%         v=lsim(Gz,[cs cs],[0 dts]);
+        v = step(cs*Gz,dts);
+        y = y+dts*v(2);
+        y=y(1);
+        ys=[ys y];
+        ts=[ts t];
+
+    end
+    
+%%%plot model
+plot(ts,ys);
+    
+%%% now plot real 
+
+data = load('RLS/IDENT/RLSIDENTDatastep.csv');
+
+rout=data(1:size(ts,2),6) ;
+plot(ts,rout);
 
 
 
 
+
+legend("Model output","Real output",'Interpreter','latex','FontSize',12);
+% legend("10","15","20","25",'Interpreter','latex','FontSize',12);
+xlabel("Time(s)",'Interpreter','latex','FontSize',24); 
+ylabel("Inclination (deg)",'Interpreter','latex','FontSize',24);
+title("Step response",'Interpreter','latex','FontSize',24);
+
+saveas(fig2,'simstep.eps','epsc');
 
