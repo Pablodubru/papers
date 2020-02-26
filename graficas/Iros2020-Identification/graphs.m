@@ -35,4 +35,4 @@ for i=1:size(incs,2)
     
 end
 
-saveas(fnums,"simrls.eps",'epsc');
+saveas(fig,'simrls.eps','epsc');
