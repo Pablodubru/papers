@@ -47,8 +47,8 @@ plot (i,poles,'x');
 
 end
 legend (leg);
-figure;plot((allnums),'x');
-figure;plot(abs(allpoles));
+figure;plot(incs,(allnums));
+figure;plot(incs,(allpoles));
 
 
 saveas(fig,"rls.eps",'epsc');
