@@ -91,15 +91,17 @@ n3=fitnums(3,:);
 p3=fitpoles(3,:);
 
 
+polyfit
+
 %      Linear model Poly1:
 %      fittedmodel(x) = p1*x + p2
 %      Coefficients (with 95% confidence bounds):
-       pc1 =     0.01175  %(0.007117, 0.01639)
-       pc2 =     -0.4797  %(-0.5739, -0.3854)
+       pc1 =     0.01175 ; %(0.007117, 0.01639)
+       pc2 =     -0.4797 ; %(-0.5739, -0.3854)
        
 %             Linear model Poly1:
 %      fittedmodel3(x) = p1*x + p2
 %      Coefficients (with 95% confidence bounds):
-       gc1 =      -0.059 % (-0.08923, -0.02877)
-       gc2 =       1.857 % (1.243, 2.472)
+       gc1 =   ;   -0.059 % (-0.08923, -0.02877)
+       gc2 =    ;   1.857 % (1.243, 2.472)
 
