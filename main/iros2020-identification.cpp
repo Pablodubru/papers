@@ -83,7 +83,7 @@ void capturaDatos(){
     m2.SwitchOn();
     m2.Setup_Velocity_Mode(200,200);
 
-    ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/SetMembershipData.csv",std::ofstream::out);
+    ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLS/IDENT/RLSIDENTSIN.csv",std::ofstream::out);
 
 
 
@@ -96,7 +96,8 @@ void capturaDatos(){
     for(double t=dts;t<1000;t=t+dts)
     {
         // sinusoidal + pseudorando                                                                                  m
-        isignal = 2.5*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67));
+        //isignal = 2.5*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67));
+        isignal=10+10*sin(2*t);
         cs=isignal-incSensor;
         m2.SetVelocity(cs);
         //m2.SetPosition(0);
@@ -131,7 +132,7 @@ void moveincl(double Inclination,SerialArduino& ArduinoSensor,CiA402Device& Moto
     if (ArduinoSensor.readSensor(incSensor,oriSensor) <0){}
     for(double t=samplingTime;t<totalTime;t=t+samplingTime){
 
-         psr=1*((rand() % 10)-5);
+         //psr=1*((rand() % 10)-5);
          //psr=(sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/6;
          cs = Inclination+psr-incSensor;
          Gident.UpdateSystem(cs,(incSensor-lastincSensor)/samplingTime);
@@ -185,6 +186,30 @@ void moveinclInit(){
     m2.SetVelocity(0);
     m2.SwitchOff();
 }
+void STEPIDENT(){
+
+    ///--sensor tilt--
+    SerialArduino tilt;
+
+    //m2
+    SocketCanPort pm2("can1");
+    CiA402SetupData sd32(2*2048,3.7,0.001, 1.1);
+    CiA402Device m2 (32, &pm2, &sd32);
+    m2.Reset();
+    m2.SwitchOn();
+    m2.Setup_Velocity_Mode(200,200);
+
+
+    double InC=10;
+    ofstream data("/home/humasoft/code/papers/graficas/Iros2020-Identification/RLS/IDENT/RLSIDENTDatasteps.csv",std::ofstream::out);
+    ofstream data2("/home/humasoft/code/papers/graficas/Iros2020-Identification/ignore/RLSPO.csv",std::ofstream::out);
+    for (int numiter=0;numiter<6;numiter++){
+        moveincl(InC+numiter*5,tilt,m2,data,data2,0.02,3);
+    }
+    m2.SetVelocity(0);
+    m2.SwitchOff();
+}
+
 int main(int argc, char *argv[])
 {
     capturaDatos();
