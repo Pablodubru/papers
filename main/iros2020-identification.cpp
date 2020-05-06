@@ -24,7 +24,7 @@ void chirpident(){
 
     //m2
     SocketCanPort pm2("can1");
-    CiA402SetupData sd32(2*2048,3.7,0.001, 1.1);
+    CiA402SetupData sd32(2*2048,3.7,0.001, 1.1, 20);
     CiA402Device m2 (32, &pm2, &sd32);
     m2.Reset();
     m2.SwitchOn();
@@ -77,7 +77,7 @@ void capturaDatos(){
 
     //m2
     SocketCanPort pm2("can1");
-    CiA402SetupData sd32(2*2048,3.7,0.001, 1.1);
+    CiA402SetupData sd32(2*2048,3.7,0.001, 1.1, 20);
     CiA402Device m2 (32, &pm2, &sd32);
     m2.Reset();
     m2.SwitchOn();
@@ -163,7 +163,7 @@ void moveinclInit(){
 
     //m2
     SocketCanPort pm2("can1");
-    CiA402SetupData sd32(2*2048,3.7,0.001, 1.1);
+    CiA402SetupData sd32(2*2048,3.7,0.001, 1.1, 20);
     CiA402Device m2 (32, &pm2, &sd32);
     m2.Reset();
     m2.SwitchOn();
@@ -193,7 +193,7 @@ void STEPIDENT(){
 
     //m2
     SocketCanPort pm2("can1");
-    CiA402SetupData sd32(2*2048,3.7,0.001, 1.1);
+    CiA402SetupData sd32(2*2048,3.7,0.001, 1.1, 20);
     CiA402Device m2 (32, &pm2, &sd32);
     m2.Reset();
     m2.SwitchOn();

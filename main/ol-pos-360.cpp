@@ -24,9 +24,9 @@ int main(){
     SocketCanPort pm2("can1");
     SocketCanPort pm3("can1");
 
-    CiA402SetupData sd1(2*2048,3.7,0.001, 1.1); //max amp 10.1
-    CiA402SetupData sd2(2*2048,3.7,0.001, 1.1);//max amp 10.1
-    CiA402SetupData sd3(2*2048,3.7,0.001, 1.1);//max amp 10.1
+    CiA402SetupData sd1(2*2048,3.7,0.001, 1.1, 20); //max amp 10.1
+    CiA402SetupData sd2(2*2048,3.7,0.001, 1.1, 20); //max amp 10.1
+    CiA402SetupData sd3(2*2048,3.7,0.001, 1.1, 20); //max amp 10.1
 
     CiA402Device m1 (1, &pm1, &sd1);
     CiA402Device m2 (2, &pm2, &sd2);
