@@ -38,7 +38,7 @@ int main ()
 //   z - 0.9048
   SystemBlock filter(0.09516,0,- 0.9048,1);
 
-  int numOrder=0,denOrder=1;
+  ulong numOrder=0,denOrder=1;
   OnlineSystemIdentification model(numOrder, denOrder);//, filter, 0.98, 0.8 );
   SystemBlock sys;
   FPDBlock con(1,1,1,dts);
@@ -50,7 +50,7 @@ int main ()
   //m1 setup
   SocketCanPort pm31("can1");
   CiA402SetupData sd31(2048,24,0.001, 0.144, 20);
-  CiA402Device m1 (1, &pm31, &sd31);
+  CiA402Device m1 (31, &pm31, &sd31);
   m1.Reset();
   m1.SwitchOn();
     m1.SetupPositionMode(10,10);
@@ -60,7 +60,7 @@ int main ()
   //m2
   SocketCanPort pm2("can1");
   CiA402SetupData sd32(2048,24,0.001, 0.144, 20);
-  CiA402Device m2 (2, &pm2, &sd32);
+  CiA402Device m2 (32, &pm2, &sd32);
   m2.Reset();
   m2.SwitchOn();
     m2.SetupPositionMode(10,10);
@@ -71,7 +71,7 @@ int main ()
   //m3
   SocketCanPort pm3("can1");
   CiA402SetupData sd33(2048,24,0.001, 0.144, 20);
-  CiA402Device m3 (3, &pm3, &sd33);
+  CiA402Device m3 (33, &pm3, &sd33);
   m3.Reset();
   m3.SwitchOn();
     m3.SetupPositionMode(10,10);
@@ -145,11 +145,11 @@ int main ()
   }
 
 
-  interval=20; //in seconds
+  interval=10; //in seconds
   for (double t=0;t<interval; t+=dts)
   {
 
-      incli=(1*t)+0.01*((rand() % 10 + 1)-5);
+      incli=(2*t)+0.01*((rand() % 10 + 1)-5);
       orien=0;
 
       neck_ik.GetIK(incli,orien,lengths);
