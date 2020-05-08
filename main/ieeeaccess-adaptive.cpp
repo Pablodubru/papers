@@ -51,7 +51,7 @@ SystemBlock sys(num,den); //the resulting identification
 
 ///Controller and tuning
 FPDBlock con(0,0,0,dts);
-FPDTuner tuner ( 100, 0.1, dts);
+FPDTuner tuner ( 60, 1, dts);
 PIDBlock intcon(0.01,0.1,0,dts);
 //double phi,mag,w=1;
 
@@ -137,28 +137,33 @@ for (double t=0;t<interval; t+=dts)
     {
         cout << "t: " << t << endl;
 
-        model.UpdateSystem(psr, imuIncli);
+        m1.SetPosition(1+psr);
+        model.UpdateSystem(1+psr, imuIncli);
         model.GetSystemBlock(sys);
-//        tuner.TuneIsom(sys,con);
+        tuner.TuneIsom(sys,con);
     }
 
     Ts.WaitSamplingTime();
 
 }
 
-tuner.TuneIsom(sys,con);
 
+
+
+
+
+
+//Main control loop
 
 double incli=20, error=0, cs=0;
 double kp = 0.0,kd = 0.0,fex = 0.0;
-
 interval=10; //in seconds
 for (double t=0;t<interval; t+=dts)
 {
 
     psr=+0.01*((rand() % 10 + 1)-5); //new pseudorandom data
 
-//    incli=15+psr;
+    incli=15+psr;
 //    orien=0;
 
     ///read sensor
@@ -175,7 +180,7 @@ for (double t=0;t<interval; t+=dts)
 //        cout << "incli: " << incli << " ; imuIncli: "  << imuIncli << endl;
 
         //Controller command
-        cs = error > intcon;
+        cs = error > con;
         m1.SetPosition(cs);
 //cout << "cs: " << cs << " ; error: "  << error << endl;
         //Update model
@@ -186,8 +191,8 @@ for (double t=0;t<interval; t+=dts)
 
         //Update controller
         tuner.TuneIsom(sys,con);
-//        con.PrintParameters();
         con.GetParameters(kp, kd, fex);
+        con.PrintParameters();
 
 
 
