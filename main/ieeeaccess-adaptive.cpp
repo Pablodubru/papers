@@ -51,8 +51,10 @@ SystemBlock sys(num,den); //the resulting identification
 
 ///Controller and tuning
 FPDBlock con(0,0,0,dts);
-FPDTuner tuner ( 60, 1, dts);
-PIDBlock intcon(0.01,0.1,0,dts);
+FPDBlock scon(0.01,0.2,-0.98,dts);
+
+FPDTuner tuner ( 90, 0.1, dts);
+PIDBlock intcon(0.01,0.2,0,dts);
 //double phi,mag,w=1;
 
 //  data << "Controller PID" << " , " << " 0.1,0.05,0,dts "<< endl;
@@ -124,7 +126,7 @@ double interval=3; //in seconds
 for (double t=0;t<interval; t+=dts)
 {
 
-    psr=+0.01*((rand() % 10 + 1)-5); //pseudorandom
+    psr=+0.1*((rand() % 10 + 1)-5); //pseudorandom
 
     if (imu.readSensor(imuIncli,imuOrien) <0)
     {
@@ -137,8 +139,8 @@ for (double t=0;t<interval; t+=dts)
     {
         cout << "t: " << t << endl;
 
-        m1.SetPosition(1+psr);
-        model.UpdateSystem(1+psr, imuIncli);
+        m1.SetPosition(2+psr);
+        model.UpdateSystem(2+psr, imuIncli);
         model.GetSystemBlock(sys);
         tuner.TuneIsom(sys,con);
     }
@@ -158,45 +160,48 @@ for (double t=0;t<interval; t+=dts)
 double incli=20, error=0, cs=0;
 double kp = 0.0,kd = 0.0,fex = 0.0;
 interval=10; //in seconds
+
 for (double t=0;t<interval; t+=dts)
 {
 
-    psr=+0.01*((rand() % 10 + 1)-5); //new pseudorandom data
 
-    incli=15+psr;
-//    orien=0;
+        psr=+0.1*((rand() % 10 + 1)-5); //new pseudorandom data
 
-    ///read sensor
-    if (imu.readSensor(imuIncli,imuOrien) <0)
-    {
-        cout << "Sensor error! ";
-        //Sensor error, do nothing.
-        cout << "Inc: " << imuIncli << " ; Ori: "  << imuOrien << endl;
-    }
-    else
-    {
-        //Compute error
-        error=incli-imuIncli;
-//        cout << "incli: " << incli << " ; imuIncli: "  << imuIncli << endl;
+        //    incli=incli+psr;
+        //    orien=0;
 
-        //Controller command
-        cs = error > con;
-        m1.SetPosition(cs);
-//cout << "cs: " << cs << " ; error: "  << error << endl;
-        //Update model
-        model.UpdateSystem(cs, imuIncli);
-        model.GetSystemBlock(sys);
-        sys.GetZTransferFunction(num,den);
-//        sys.PrintZTransferFunction(dts);
+        ///read sensor
+        if (imu.readSensor(imuIncli,imuOrien) <0)
+        {
+            cout << "Sensor error! ";
+            //Sensor error, do nothing.
+            cout << "Inc: " << imuIncli << " ; Ori: "  << imuOrien << endl;
+        }
+        else
+        {
+            //Compute error
+            error=(psr+incli)-imuIncli;
+            //        cout << "incli: " << incli << " ; imuIncli: "  << imuIncli << endl;
+
+            //Controller command
+            cs = error > scon;
+            m1.SetPosition(cs);
+//            cout << "cs: " << cs << " ; error: "  << error << endl;
+            //Update model
+
+            model.UpdateSystem(cs, imuIncli);
+            model.GetSystemBlock(sys);
+            sys.GetZTransferFunction(num,den);
+//            sys.PrintZTransferFunction(dts);
 
         //Update controller
         tuner.TuneIsom(sys,con);
         con.GetParameters(kp, kd, fex);
         con.PrintParameters();
 
+        }
 
 
-    }
 
     condata << t << ", " << kp << ", " << kd << ", " << fex   << endl;
 
@@ -224,10 +229,10 @@ for (double t=0;t<interval; t+=dts)
 //  sleep (1);
 //  m1.SetPosition(0);
   m1.SetPosition(0);
+  sleep (3);
   m1.SwitchOff();
 //  m3.SetPosition(0);
 
-  sleep (3);
 sysdata.close();
 condata.close();
 
