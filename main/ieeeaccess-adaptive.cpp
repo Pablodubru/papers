@@ -51,9 +51,9 @@ SystemBlock sys(num,den); //the resulting identification
 
 ///Controller and tuning
 FPDBlock con(0,0,0,dts);
-FPDBlock scon(0.01,0.2,-0.98,dts);
+FPDBlock scon(0,0.2,-1.1,dts);
 
-FPDTuner tuner ( 90, 0.1, dts);
+FPDTuner tuner ( 100, 1, dts);
 PIDBlock intcon(0.01,0.2,0,dts);
 //double phi,mag,w=1;
 
