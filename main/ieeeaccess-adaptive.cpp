@@ -29,10 +29,11 @@ SerialArduino imu;
 double imuIncli,imuOrien;
 //    sleep(4); //wait for sensor
 
-ofstream data("/home/humasoft/code/papers/graficas/test2/ids900.csv",std::ofstream::out);
+ofstream sysdata("/home/humasoft/Escritorio/adasys000.csv",std::ofstream::out);
+ofstream condata("/home/humasoft/Escritorio/adacon000.csv",std::ofstream::out);
 
 //Samplinfg time
-double dts=0.025; //
+double dts=0.02; //
 SamplingTime Ts(dts);
 
 /// System identification
@@ -41,7 +42,7 @@ SamplingTime Ts(dts);
 //   ----------
 //   z - 0.9048
 SystemBlock filter(0.09516,0,- 0.9048,1);
-ulong numOrder=1,denOrder=2;
+ulong numOrder=0,denOrder=2;
 OnlineSystemIdentification model(numOrder, denOrder, filter, 0.98, 0.8 );
 vector<double> num(numOrder+1),den(denOrder+1); //(order 0 also counts)
 SystemBlock sys(num,den); //the resulting identification
@@ -49,9 +50,11 @@ SystemBlock sys(num,den); //the resulting identification
 
 
 ///Controller and tuning
-FPDBlock con(1,1,-0.5,dts);
-FPDTuner tuner ( 60, 1, dts);
-PIDBlock intcon(0.1,0.01,0,dts);
+FPDBlock con(0,0,0,dts);
+FPDBlock scon(0,0.2,-1.1,dts);
+
+FPDTuner tuner ( 100, 1, dts);
+PIDBlock intcon(0.01,0.2,0,dts);
 //double phi,mag,w=1;
 
 //  data << "Controller PID" << " , " << " 0.1,0.05,0,dts "<< endl;
@@ -66,25 +69,25 @@ PIDBlock intcon(0.1,0.01,0,dts);
 //  m1.Setup_Velocity_Mode(5);
 //  m1.Setup_Torque_Mode();
 
-  //m2
-  SocketCanPort pm2("can1");
-  CiA402SetupData sd32(2048,24,0.001, 0.144, 20);
-  CiA402Device m2 (32, &pm2, &sd32);
-  m2.Reset();
-  m2.SwitchOn();
-    m2.SetupPositionMode(10,10);
-//  m2.Setup_Velocity_Mode(5);
-//  m2.Setup_Torque_Mode();
+//  //m2
+//  SocketCanPort pm2("can1");
+//  CiA402SetupData sd32(2048,24,0.001, 0.144, 20);
+//  CiA402Device m2 (32, &pm2, &sd32);
+//  m2.Reset();
+//  m2.SwitchOn();
+//    m2.SetupPositionMode(10,10);
+////  m2.Setup_Velocity_Mode(5);
+////  m2.Setup_Torque_Mode();
 
 
-  //m3
-  SocketCanPort pm3("can1");
-  CiA402SetupData sd33(2048,24,0.001, 0.144, 20);
-  CiA402Device m3 (33, &pm3, &sd33);
-  m3.Reset();
-  m3.SwitchOn();
-    m3.SetupPositionMode(10,10);
-//  m3.Setup_Velocity_Mode(5);
+//  //m3
+//  SocketCanPort pm3("can1");
+//  CiA402SetupData sd33(2048,24,0.001, 0.144, 20);
+//  CiA402Device m3 (33, &pm3, &sd33);
+//  m3.Reset();
+//  m3.SwitchOn();
+////    m3.SetupPositionMode(10,10);
+////  m3.Setup_Velocity_Mode(5);
 //  m3.Setup_Torque_Mode();
 
 
@@ -116,78 +119,105 @@ for (double t=0; t<6; t+=dts)
 
 //double targetAngle1, targetAngle2, targetAngle3;
 
-double psr=+0.01*((rand() % 10 + 1)-5); //pseudorandom
+double psr=+0.1*((rand() % 10 + 1)-5); //pseudorandom
 
 //populate system matrices
-double interval=2; //in seconds
+double interval=3; //in seconds
 for (double t=0;t<interval; t+=dts)
 {
 
-    psr=+0.01*((rand() % 10 + 1)-5); //pseudorandom
+    psr=+0.1*((rand() % 10 + 1)-5); //pseudorandom
 
     if (imu.readSensor(imuIncli,imuOrien) <0)
     {
-        cout << "Sensor error! " ;
+        cout << "Initializing sensor! " ;
         //Sensor error, do nothing.
         cout << "Inc: " << imuIncli << " ; Ori: "  << imuOrien << endl;
 
     }
+    else
+    {
+        cout << "t: " << t << endl;
 
-    model.UpdateSystem(psr, imuIncli);
-    model.GetSystemBlock(sys);
-    tuner.TuneIsom(sys,con);
+        m1.SetPosition(2+psr);
+        model.UpdateSystem(2+psr, imuIncli);
+        model.GetSystemBlock(sys);
+        tuner.TuneIsom(sys,con);
+    }
 
     Ts.WaitSamplingTime();
 
 }
 
-double incli=15, orien=0, error=0, cs=0;
 
+
+
+
+
+
+//Main control loop
+
+double incli=20, error=0, cs=0;
+double kp = 0.0,kd = 0.0,fex = 0.0;
 interval=10; //in seconds
+
 for (double t=0;t<interval; t+=dts)
 {
 
-    psr=+0.01*((rand() % 10 + 1)-5); //new pseudorandom data
 
-//    incli=15+psr;
-//    orien=0;
+        psr=+0.1*((rand() % 10 + 1)-5); //new pseudorandom data
 
-    ///read sensor
-    if (imu.readSensor(imuIncli,imuOrien) <0)
-    {
-        cout << "Sensor error! ";
-        //Sensor error, do nothing.
-        cout << "Inc: " << imuIncli << " ; Ori: "  << imuOrien << endl;
-    }
+        //    incli=incli+psr;
+        //    orien=0;
 
-    //Compute error
-    error=incli-imuIncli;
+        ///read sensor
+        if (imu.readSensor(imuIncli,imuOrien) <0)
+        {
+            cout << "Sensor error! ";
+            //Sensor error, do nothing.
+            cout << "Inc: " << imuIncli << " ; Ori: "  << imuOrien << endl;
+        }
+        else
+        {
+            //Compute error
+            error=(psr+incli)-imuIncli;
+            //        cout << "incli: " << incli << " ; imuIncli: "  << imuIncli << endl;
 
-    //Controller command
-    cs = error > con;
-    m1.SetPosition(cs);
+            //Controller command
+            cs = error > scon;
+            m1.SetPosition(cs);
+//            cout << "cs: " << cs << " ; error: "  << error << endl;
+            //Update model
 
-    //Update model
-    model.UpdateSystem(cs, imuIncli);
-    model.GetSystemBlock(sys);
-    sys.GetZTransferFunction(num,den);
+            model.UpdateSystem(cs, imuIncli);
+            model.GetSystemBlock(sys);
+            sys.GetZTransferFunction(num,den);
+//            sys.PrintZTransferFunction(dts);
 
-    //Update controller
-    tuner.TuneIsom(sys,con);
+        //Update controller
+        tuner.TuneIsom(sys,con);
+        con.GetParameters(kp, kd, fex);
+        con.PrintParameters();
+
+        }
 
 
-    data << t;
+
+    condata << t << ", " << kp << ", " << kd << ", " << fex   << endl;
+
+
+    sysdata << t;
     for (int i=num.size()-1; i>=0; i--)
     {
-        data << ", " << num[i];
+        sysdata << ", " << num[i];
     }
     //      cout << "],[ " << idDen.back();
     for (int i=den.size()-1; i>=0; i--)
     {
-        data << ", " << den[i];
+        sysdata << ", " << den[i];
 
     }
-    data << endl;
+    sysdata << endl;
     Ts.WaitSamplingTime();
 
 
@@ -197,12 +227,14 @@ for (double t=0;t<interval; t+=dts)
 //  m2.SetPosition(0);
 //  m3.SetPosition(0);
 //  sleep (1);
+//  m1.SetPosition(0);
   m1.SetPosition(0);
-  m2.SetPosition(0);
-  m3.SetPosition(0);
-
   sleep (3);
-data.close();
+  m1.SwitchOff();
+//  m3.SetPosition(0);
+
+sysdata.close();
+condata.close();
 
 
 
