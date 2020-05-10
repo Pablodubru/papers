@@ -13,7 +13,7 @@ clear;close all;s=tf('s');
 %wn2=1/0.1508;xi2wn=0.2633/0.1508;%Cycab con bode igual que Carlos
 %wsp=0.5;pm=40;Ts=0.05;caso=1; %cycab
 wn2=4.51;xi2wn=3.717; %accord
-wsp=1;pm=50;Ts=0.05;caso=1; %accord
+wsp=1;pm=90;Ts=0.05;caso=1; %accord
 %wsp=3;pm=70;Ts=0.05;caso=2; %accord
 %%%%%%%%%%%
 
@@ -57,7 +57,8 @@ ps = mod(angle(sys(Nm))*180/pi, -360);
 m= - ( angle(sys(Nm+dm))-angle(sys(Nm-dm)) ) / ( log10(w(Nm+dm))-log10(w(Nm-dm)) );
 
 
-
+ps=-53;
+m=-60;
 
 
 %find required controller phi

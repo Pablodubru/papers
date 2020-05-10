@@ -26,7 +26,9 @@ int main (){
 
 //--sensor--
 SerialArduino imu;
-double imuIncli,imuOrien;
+double imuIncli=0,imuOrien,imuIncliOld=0;
+SystemBlock imuFilter(0.09516,0,- 0.9048,1); //w=5
+
 //    sleep(4); //wait for sensor
 
 ofstream sysdata("/home/humasoft/Escritorio/adasys000.csv",std::ofstream::out);
@@ -41,20 +43,27 @@ SamplingTime Ts(dts);
 //    0.09516
 //   ----------
 //   z - 0.9048
-SystemBlock filter(0.09516,0,- 0.9048,1);
-ulong numOrder=0,denOrder=2;
+SystemBlock filter(0.09516,0,- 0.9048,1); //w=5
+ulong numOrder=0,denOrder=3;
 OnlineSystemIdentification model(numOrder, denOrder, filter, 0.98, 0.8 );
+double modelError=0;
 vector<double> num(numOrder+1),den(denOrder+1); //(order 0 also counts)
 SystemBlock sys(num,den); //the resulting identification
+double sysk=0;
 
 
 
 ///Controller and tuning
 FPDBlock con(0,0,0,dts);
-FPDBlock scon(0,0.2,-1.1,dts);
+//FPDBlock scon(0.3,0.02,0.5,dts);
+FPDBlock scon(0.23,0.36,-0.6,dts);
 
-FPDTuner tuner ( 100, 1, dts);
-PIDBlock intcon(0.01,0.2,0,dts);
+
+double wgc=10;
+FPDTuner tuner ( 80, wgc, dts);//ok first order
+//FPDTuner tuner ( 60, 5, dts);//ok second order exp
+
+PIDBlock intcon(0.1,0,0.1,dts);
 //double phi,mag,w=1;
 
 //  data << "Controller PID" << " , " << " 0.1,0.05,0,dts "<< endl;
@@ -65,30 +74,9 @@ PIDBlock intcon(0.01,0.2,0,dts);
   CiA402Device m1 (31, &pm31, &sd31);
   m1.Reset();
   m1.SwitchOn();
-    m1.SetupPositionMode(10,10);
-//  m1.Setup_Velocity_Mode(5);
+//    m1.SetupPositionMode(10,10);
+  m1.Setup_Velocity_Mode(5);
 //  m1.Setup_Torque_Mode();
-
-//  //m2
-//  SocketCanPort pm2("can1");
-//  CiA402SetupData sd32(2048,24,0.001, 0.144, 20);
-//  CiA402Device m2 (32, &pm2, &sd32);
-//  m2.Reset();
-//  m2.SwitchOn();
-//    m2.SetupPositionMode(10,10);
-////  m2.Setup_Velocity_Mode(5);
-////  m2.Setup_Torque_Mode();
-
-
-//  //m3
-//  SocketCanPort pm3("can1");
-//  CiA402SetupData sd33(2048,24,0.001, 0.144, 20);
-//  CiA402Device m3 (33, &pm3, &sd33);
-//  m3.Reset();
-//  m3.SwitchOn();
-////    m3.SetupPositionMode(10,10);
-////  m3.Setup_Velocity_Mode(5);
-//  m3.Setup_Torque_Mode();
 
 
 IPlot id;
@@ -103,30 +91,18 @@ for (double t=0; t<6; t+=dts)
 }
 
 
-//  m1.SetTorque(0.01);
-//  m2.SetTorque(0.01);
-//  m3.SetTorque(0.01);
 
 
 
-////only for position mode.
-////--Neck Kinematics--
-//double l0=0.1085;
-//double lg0=l0+0.002;
-//double radius=0.01; //winch radius
-//GeoInkinematics neck_ik(0.052,0.052,l0); //kinematics geometric
-//vector<double> lengths(3);
-
-//double targetAngle1, targetAngle2, targetAngle3;
-
-double psr=+0.1*((rand() % 10 + 1)-5); //pseudorandom
+double psr=+0.5*((rand() % 10 + 1)-5); //pseudorandom
+double interval=3; //in seconds
 
 //populate system matrices
-double interval=3; //in seconds
 for (double t=0;t<interval; t+=dts)
 {
 
     psr=+0.1*((rand() % 10 + 1)-5); //pseudorandom
+    imuIncliOld=imuIncli;
 
     if (imu.readSensor(imuIncli,imuOrien) <0)
     {
@@ -139,8 +115,8 @@ for (double t=0;t<interval; t+=dts)
     {
         cout << "t: " << t << endl;
 
-        m1.SetPosition(2+psr);
-        model.UpdateSystem(2+psr, imuIncli);
+        m1.SetVelocity(psr);
+        model.UpdateSystem(psr, imuIncliOld);
         model.GetSystemBlock(sys);
         tuner.TuneIsom(sys,con);
     }
@@ -159,18 +135,20 @@ for (double t=0;t<interval; t+=dts)
 
 double incli=20, error=0, cs=0;
 double kp = 0.0,kd = 0.0,fex = 0.0;
+double smag = 0.0,sphi = 0.0;
 interval=10; //in seconds
 
 for (double t=0;t<interval; t+=dts)
 {
 
 
-        psr=+0.1*((rand() % 10 + 1)-5); //new pseudorandom data
+        psr=+2*((rand() % 10 + 1)-5); //new pseudorandom data
 
         //    incli=incli+psr;
         //    orien=0;
 
         ///read sensor
+        imuIncliOld=imuIncli;
         if (imu.readSensor(imuIncli,imuOrien) <0)
         {
             cout << "Sensor error! ";
@@ -179,25 +157,43 @@ for (double t=0;t<interval; t+=dts)
         }
         else
         {
+            imuIncli = imuIncli > imuFilter;
             //Compute error
             error=(psr+incli)-imuIncli;
             //        cout << "incli: " << incli << " ; imuIncli: "  << imuIncli << endl;
 
             //Controller command
             cs = error > scon;
-            m1.SetPosition(cs);
+            m1.SetVelocity(cs);
 //            cout << "cs: " << cs << " ; error: "  << error << endl;
             //Update model
 
-            model.UpdateSystem(cs, imuIncli);
-            model.GetSystemBlock(sys);
-            sys.GetZTransferFunction(num,den);
-//            sys.PrintZTransferFunction(dts);
+//            model.UpdateSystem(cs, (imuIncli-imuIncliOld)/dts);
+            modelError = model.UpdateSystem(cs, imuIncliOld);
 
-        //Update controller
-        tuner.TuneIsom(sys,con);
-        con.GetParameters(kp, kd, fex);
-        con.PrintParameters();
+            model.GetSystemBlock(sys);
+            sysk=sys.GetZTransferFunction(num,den);
+
+            if(sysk<0)
+            {
+                cout << "Modeling error: "  << modelError << ", sysk: "  << sysk<< endl;
+
+            }
+            else
+            {
+                sys.PrintZTransferFunction(dts);
+                sys.GetMagnitudeAndPhase(dts,wgc,smag,sphi);
+//                cout << "smag: " << smag << " ; sphi: "  << sphi*180/M_PI << endl;
+
+                //Update controller
+                tuner.TuneIsom(sys,con);
+                con.GetParameters(kp, kd, fex);
+                con.PrintParameters();
+
+            }
+
+
+
 
         }
 
@@ -217,6 +213,7 @@ for (double t=0;t<interval; t+=dts)
         sysdata << ", " << den[i];
 
     }
+    sysdata << ", " << smag << ", " << sphi;
     sysdata << endl;
     Ts.WaitSamplingTime();
 
@@ -228,8 +225,8 @@ for (double t=0;t<interval; t+=dts)
 //  m3.SetPosition(0);
 //  sleep (1);
 //  m1.SetPosition(0);
-  m1.SetPosition(0);
-  sleep (3);
+  m1.SetVelocity(0);
+//  sleep (3);
   m1.SwitchOff();
 //  m3.SetPosition(0);
 
