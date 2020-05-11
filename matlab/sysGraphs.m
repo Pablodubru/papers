@@ -4,11 +4,17 @@ dts=0.02;
 z=tf('z',0.02);
 s=tf('s');
 
-data=csvread("/home/humasoft/Escritorio/adasys000.csv")
-t=data(:,1);
-mag=data(:,7);
-phi=data(:,8);
+datan=csvread("/home/humasoft/Escritorio/adasysnum000.csv")
+datad=csvread("/home/humasoft/Escritorio/adasysden000.csv")
+
+N=size(datan,2);
+M=size(datad,2);
+
+
+t=datan(:,1);
+
 
 figure; hold on;
-plot(t,mag);
-plot(t,phi);
+plot(t,datan(:,3:N));
+figure; hold on;
+plot(t,datad(:,4:M));
