@@ -9,17 +9,23 @@
 
 int main(){
 
+    //Parameters
+    double dts=0.02;
+    double w=1, pos=0, inc=0;
+
+
     ofstream data("/home/humasoft/Escritorio/sensor-response.csv",std::ofstream::out);
 
 
     //--sensor--
     SerialArduino tilt;
     double incSensor = 0.0,oriSensor = 0.0;
-    double dts=0.02;
     sleep(2); //wait for sensor
-    SystemBlock filterSensor(0.09516,0,- 0.9048,1); //w=5 0.09516 / (z - 0.9048)
-
+//    SystemBlock filterSensor(0.09516,0,- 0.9048,1); //w=5,dts=0.02 -> 0.09516 / (z - 0.9048)
 //    SystemBlock filterSensor(0.001998,0,- 0.998,1); // w=0.1 so bad!!   0.001998 / (z - 0.998)
+    //tustin lowpass approximation (w/(s+w))
+    SystemBlock filterSensor(w*dts,w*dts,w*dts-2,2+w*dts); //w*dts*(z+1)/(z*(2+w*dts)+(w*dts-2));
+
 
 
     SamplingTime Ts;
@@ -52,9 +58,9 @@ m.SetPosition(0);
     }
     cout << "Sensor started"  << endl;
 
-double w=5, pos=0, inc=0;
-    for (double t=0;t<20;t+=dts){
-        pos=2+2*cos(w*t);
+    for (double t=0;t<20;t+=dts)
+    {
+        pos=2+2*sin(w*t);
         m.SetPosition(pos);
 
 //        if (tilt.estimateSensor(incSensor,oriSensor)<0)
