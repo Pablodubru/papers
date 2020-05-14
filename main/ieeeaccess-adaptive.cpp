@@ -101,10 +101,15 @@ int main (){
 
     double psr; //pseudorandom
     double interval=6; //in seconds
+
+    //initialize model
+    vector<double> theta={-1.0246, 0.0248015, 0.133564};
+    model.SetParamsVector(theta);
+
     //populate system matrices
     for (double t=0;t<interval; t+=dts)
     {
-        psr=+0.2*((rand() % 10)-5); //pseudorandom
+        psr=+0.4*(1+(rand() % 10)-5); //pseudorandom
         imuIncliOld=imuIncli;
         if (imu.readSensor(imuIncli,imuOrien) <0)
         {
@@ -119,7 +124,7 @@ int main (){
             m1.SetVelocity(psr);
             model.UpdateSystem(psr, imuIncli);
             model.GetSystemBlock(sys[0]);
-//            tuner.TuneIsom(sys,con);
+            tuner.TuneIsom(sys,con);
         }
         Ts.WaitSamplingTime();
     }
@@ -136,7 +141,7 @@ int main (){
     double kp = 0.0,kd = 0.0,fex = 0.0;
     double smag = 0.0,sphi = 0.0;
     double sysk=0;
-    interval=10; //in seconds
+    interval=20; //in seconds
 
     for (long rep=0;rep<4;rep++)
     {
@@ -179,15 +184,25 @@ int main (){
             model.GetAvgSystemBlock(sys[0]);
 //            model.PrintZTransferFunction(dts);
 
+
             sysk=sys[0].GetZTransferFunction(num,den);
 
             sys[0].GetMagnitudeAndPhase(dts,wgc,smag,sphi);
 
-            if (sphi<0)
+
+//            if (sphi<-0.9)
             {
                 tuner.TuneIsom(sys,con);
                 con.GetParameters(kp,kd,fex);
-                con.PrintParameters();
+//                con.PrintParameters();
+
+//                vector<double> sparams;
+//                sparams = model.GetParamsVector();
+//                for (ulong i=0; i<sparams.size(); i++)
+//                {
+//                    cout << sparams[i] << ", ";
+//                }
+//                cout << endl;
             }
 
 
