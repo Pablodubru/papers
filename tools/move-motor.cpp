@@ -26,7 +26,7 @@ int main ()
     cout << "Enter to stop." <<endl;
 
     // position  [rads]
-    m.SetVelocity(2);
+    m.SetVelocity(-2);
 
     getchar();
 

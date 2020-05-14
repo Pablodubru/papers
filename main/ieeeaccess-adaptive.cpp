@@ -41,20 +41,21 @@ int main (){
     SamplingTime Ts(dts);
 
     /// System identification
-    //tau = 0.1
-    //    0.09516
-    //   ----------
-    //   z - 0.9048
-    SystemBlock filter(0.09516,0,- 0.9048,1); //w=5
-//    SystemBlock filter(-19,21,1,1); //w=5   21 z - 19 /  z + 1
+    double wf=1;
 
-    ulong numOrder=0,denOrder=1;
-    OnlineSystemIdentification model(numOrder, denOrder, filter, 0.98, 0.1 );
-    double convergence=0;
+    SystemBlock filterSensor(wf*dts,wf*dts,wf*dts-2,2+wf*dts); //w*dts*(z+1)/(z*(2+w*dts)+(w*dts-2));
+    SystemBlock filterSignal(wf*dts,wf*dts,wf*dts-2,2+wf*dts); //w*dts*(z+1)/(z*(2+w*dts)+(w*dts-2));
+//    SystemBlock filterMag(wf*dts,wf*dts,wf*dts-2,2+wf*dts); //w*dts*(z+1)/(z*(2+w*dts)+(w*dts-2));
+//    SystemBlock filterPhi(wf*dts,wf*dts,wf*dts-2,2+wf*dts); //w*dts*(z+1)/(z*(2+w*dts)+(w*dts-2));
+
+    ulong numOrder=0,denOrder=2;
+    SystemBlock filter(wf*dts,wf*dts,wf*dts-2,2+wf*dts); //w*dts*(z+1)/(z*(2+w*dts)+(w*dts-2));
+    OnlineSystemIdentification model(numOrder, denOrder, filter, 0.98, 0.8, 1/20.0 );
+
     vector<double> num(numOrder+1),den(denOrder+1); //(order 0 also counts)
-    SystemBlock integral(0,1,-1,1);
-    vector<SystemBlock> sys = {SystemBlock(num,den),integral}; //the resulting identification
-    double sysk=0, syskAverage=0.1;
+//    SystemBlock integral(0,1,-1,1);
+    vector<SystemBlock> sys = {SystemBlock(num,den)}; //the resulting identification
+//    double sysk=0, syskAverage=0.1;
 
 
 
@@ -63,9 +64,9 @@ int main (){
     FPDBlock con(0.15,0.03,0.75,dts);
     FPDBlock scon(0.23,0.36,-0.6,dts);
 
-    double wgc=2;
+    double wgc=1;
 //    FPDTuner tuner ( 100, 2, dts);//ok second order (0,2)+integrator derivative control
-    FPDTuner tuner ( 50, 2, dts);//ok second order (0,2)+integrator integral control
+    FPDTuner tuner ( 50, wgc, dts);//ok second order (0,2)+integrator integral control
 
 
     PIDBlock intcon(0.1,0,0.1,dts);
@@ -89,7 +90,6 @@ int main (){
     IPlot id;
 
 
-
     //tilt sensor initialization
     for (double t=0; t<6; t+=10*dts)
     {
@@ -98,42 +98,30 @@ int main (){
 
     }
 
-
-
-
-
-    double psr=+0.5*((rand() % 10 + 1)-5); //pseudorandom
+    double psr; //pseudorandom
     double interval=3; //in seconds
-
     //populate system matrices
     for (double t=0;t<interval; t+=dts)
     {
-
-        psr=+0.5*((rand() % 10 + 1)-5); //pseudorandom
+        psr=+0.2*((rand() % 10)-5); //pseudorandom
         imuIncliOld=imuIncli;
-
         if (imu.readSensor(imuIncli,imuOrien) <0)
         {
             cout << "Initializing sensor! " ;
             //Sensor error, do nothing.
             cout << "Inc: " << imuIncli << " ; Ori: "  << imuOrien << endl;
-
         }
         else
         {
 //            cout << "t: " << t << endl;
 //            cout << "Inc: " << imuIncli << " ; Ori: "  << imuOrien << endl;
-
             m1.SetVelocity(psr);
             model.UpdateSystem(psr, imuIncliOld);
             model.GetSystemBlock(sys[0]);
 //            tuner.TuneIsom(sys,con);
         }
-
         Ts.WaitSamplingTime();
-
     }
-
 
 
 
@@ -146,6 +134,7 @@ int main (){
     double incli=5, error=0, cs=0;
     double kp = 0.0,kd = 0.0,fex = 0.0;
     double smag = 0.0,sphi = 0.0;
+    double sysk=0;
     interval=10; //in seconds
 
     for (long rep=0;rep<4;rep++)
@@ -157,7 +146,7 @@ int main (){
     {
 
 
-        psr=+0.1*((rand() % 10 + 1)-5); //new pseudorandom data
+        psr=+0.2*((rand() % 10)-5); //new pseudorandom data
 
         //    incli=incli+psr;
         //    orien=0;
@@ -168,7 +157,7 @@ int main (){
         {
             cout << "Sensor error! ";
             //Sensor error, do nothing.
-//            cout << "Inc: " << imuIncli << " ; Ori: "  << imuOrien << endl;
+            //            cout << "Inc: " << imuIncli << " ; Ori: "  << imuOrien << endl;
         }
         else
         {
@@ -178,58 +167,20 @@ int main (){
             //        cout << "incli: " << incli << " ; imuIncli: "  << imuIncli << endl;
 
             //Controller command
-            cs = error > con;
+            cs = error > scon;
             m1.SetVelocity(cs);
             //            cout << "cs: " << cs << " ; error: "  << error << endl;
             //Update model
 
-            //velocity / velocity id
-            convergence = model.UpdateSystem(cs, (imuIncli-imuIncliOld)/dts);
+            model.UpdateSystem(cs, imuIncli);
+//            cout << "cs: " << cs << " ; imuIncli: "  << imuIncli << endl;
 
-            //velocity / pos id
-//                        convergence = model.UpdateSystem(cs, imuIncliOld);
+            model.GetAvgSystemBlock(sys[0]);
+//            model.PrintZTransferFunction(dts);
 
-            model.GetSystemBlock(sys[0]);
             sysk=sys[0].GetZTransferFunction(num,den);
 
-
-            if(sysk<0 | convergence>0.1 | convergence <0)
-            {
-//                cout << "Convergence: "  << convergence << ", sysk: "  << sysk<< endl;
-//                sys[0].PrintZTransferFunction(dts);
-
-
-            }
-            else
-            {
-                //mean k update here
-                syskAverage=syskAverage*(1-0.1)+0.1*sysk;
-//                cout << "syskAverage: "  << syskAverage << ", sysk: "  << sysk<< endl;
-
-                if (abs(sysk-syskAverage)<0.2*syskAverage)
-                {
-                    cout << "syskAverage: "  << syskAverage << ", sysk: "  << sysk<< endl;
-
-                    //                cout << "Convergence: "  << convergence << ", sysk: "  << sysk<< endl;
-
-                    //                sys[0].PrintZTransferFunction(dts);
-                    //                sys[0].GetMagnitudeAndPhase(dts,wgc,smag,sphi);
-                    //                cout << "smag: " << smag << " ; sphi: "  << sphi*180/M_PI << endl;
-
-                    //                cout << "Convergence: "  << convergence << ", sysk: "  << sysk<< endl;
-
-                    //Update controller
-                    tuner.TuneIsom(sys,con);
-                    con.GetParameters(kp, kd, fex);
-                    con.PrintParameters();
-
-                }
-
-
-            }
-
-
-
+            sys[0].GetMagnitudeAndPhase(dts,wgc,smag,sphi);
 
         }
 

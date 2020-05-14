@@ -1,8 +1,12 @@
 data=csvread("/home/humasoft/Escritorio/sensor-response.csv")
 t=data(:,1);
-p=data(:,2);
-i=data(:,3);
+i=data(:,2);
+o=data(:,3);
+fi=data(:,4);
+fo=data(:,5);
 
-figure; hold on;
+figure; hold on;grid on;
 plot(t,p);
-plot(t,i);
+%plot(t,i);
+plot(t,fi);
+plot(t,fp);
