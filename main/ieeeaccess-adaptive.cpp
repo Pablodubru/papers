@@ -51,7 +51,7 @@ int main (){
 
     ulong numOrder=0,denOrder=2;
     SystemBlock filter(wf*dts,wf*dts,wf*dts-2,2+wf*dts); //w*dts*(z+1)/(z*(2+w*dts)+(w*dts-2));
-    OnlineSystemIdentification model(numOrder, denOrder, filter, 0.98, 0.8, 40 );
+    OnlineSystemIdentification model(numOrder, denOrder, filter, 0.98, 0.8, 30 );
 
     vector<double> num(numOrder+1),den(denOrder+1); //(order 0 also counts)
 //    SystemBlock integral(0,1,-1,1);
@@ -102,14 +102,12 @@ int main (){
     double psr; //pseudorandom
     double interval=6; //in seconds
 
-    //initialize model
-    vector<double> theta={-1.0246, 0.0248015, 0.133564};
-    model.SetParamsVector(theta);
+
 
     //populate system matrices
     for (double t=0;t<interval; t+=dts)
     {
-        psr=+0.4*(1+(rand() % 10)-5); //pseudorandom
+        psr=+0.4*sin(wgc*t)+(1+(rand() % 10)-5); //pseudorandom
         imuIncliOld=imuIncli;
         if (imu.readSensor(imuIncli,imuOrien) <0)
         {
@@ -130,7 +128,9 @@ int main (){
     }
 
 
-
+    //initialize model
+    vector<double> theta={-1.0246, 0.0248015, 0.133564};
+    model.SetParamsVector(theta);
 
 
 
@@ -141,7 +141,7 @@ int main (){
     double kp = 0.0,kd = 0.0,fex = 0.0;
     double smag = 0.0,sphi = 0.0;
     double sysk=0;
-    interval=20; //in seconds
+    interval=30; //in seconds
 
     for (long rep=0;rep<4;rep++)
     {
@@ -181,6 +181,7 @@ int main (){
             model.UpdateSystem(cs, imuIncli);
 //            cout << "cs: " << cs << " ; imuIncli: "  << imuIncli << endl;
 
+//            model.GetSystemBlock(sys[0]);
             model.GetAvgSystemBlock(sys[0]);
 //            model.PrintZTransferFunction(dts);
 
@@ -190,7 +191,7 @@ int main (){
             sys[0].GetMagnitudeAndPhase(dts,wgc,smag,sphi);
 
 
-//            if (sphi<-0.9)
+            if (sphi<-0.9)
             {
                 tuner.TuneIsom(sys,con);
                 con.GetParameters(kp,kd,fex);

@@ -20,17 +20,17 @@ plot(t,datan(:,3:N));
 figure; hold on;
 plot(t,datad(:,4:M));
 
-poles=[];
-for i=1:SZ
-poles=[poles, roots(datad(i,3:M))]; %#ok<*AGROW>
-end
-
-figure;
-plot(real(poles)');
-
-figure;
-plot(imag(poles)');
-
-sys=tf(datan(SZ,3:N),datad(SZ,3:M),dts);
-figure;
-bode(sys);
+% poles=[];
+% for i=1:SZ
+% poles=[poles, roots(datad(i,3:M))]; %#ok<*AGROW>
+% end
+% 
+% figure;
+% plot(real(poles)');
+% 
+% figure;
+% plot(imag(poles)');
+% 
+% sys=tf(datan(SZ,3:N),datad(SZ,3:M),dts);
+% figure;
+% bode(sys);
