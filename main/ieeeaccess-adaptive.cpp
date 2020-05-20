@@ -36,13 +36,15 @@ int main (){
     ofstream sysdataden("/home/humasoft/Escritorio/adasysden000.csv",std::ofstream::out);
     ofstream condata("/home/humasoft/Escritorio/adacon000.csv",std::ofstream::out);
     ofstream sysdatamp("/home/humasoft/Escritorio/sensor-response.csv",std::ofstream::out);
+    ofstream timeresp("/home/humasoft/Escritorio/time-response.csv",std::ofstream::out);
+
 
     //Samplinfg time
     double dts=0.025; //
     SamplingTime Ts(dts);
 
     /// System identification
-    double wf=1;
+    double wf=2;
 
     SystemBlock filterSensor(wf*dts,wf*dts,wf*dts-2,2+wf*dts); //w*dts*(z+1)/(z*(2+w*dts)+(w*dts-2));
     SystemBlock filterSignal(wf*dts,wf*dts,wf*dts-2,2+wf*dts); //w*dts*(z+1)/(z*(2+w*dts)+(w*dts-2));
@@ -65,8 +67,8 @@ int main (){
     FPDBlock con(0.15,0.03,0.75,dts);
     FPDBlock scon(0.23,0.36,-0.6,dts);
 
-    double wgc=1;
-//    FPDTuner tuner ( 100, 2, dts);//ok second order (0,2)+integrator derivative control
+    double wgc=2;
+//    FPDTuner tuner ( 100, wgc, dts);//ok second order (0,2)+integrator derivative control unstable
     FPDTuner tuner ( 50, wgc, dts);//ok second order (0,2)+integrator integral control
 
 
@@ -99,15 +101,23 @@ int main (){
 
     }
 
-    double psr; //pseudorandom
-    double interval=6; //in seconds
+    //initialize model
+    vector<double> theta={-1.0246, 0.0248015, 0.133564};
+    model.SetParamsVector(theta);
 
+    double psr; //pseudorandom
+    double tinit=100; //in seconds
+    double incli=5, error=0, cs=0;
+
+    double kp = 0.0,kd = 0.0,fex = 0.0;
+    double smag = 0.0,sphi = 0.0;
+    double sysk=0;
 
 
     //populate system matrices
-    for (double t=0;t<interval; t+=dts)
+    for (double t=0;t<tinit; t+=dts)
     {
-        psr=+0.4*sin(wgc*t)+(1+(rand() % 10)-5); //pseudorandom
+        psr=+5*( 1+0.5*( sin(wgc*t) + sin(10*wgc*t) ) + 0.5*(0+(rand() % 10)-5) ); //pseudorandom
         imuIncliOld=imuIncli;
         if (imu.readSensor(imuIncli,imuOrien) <0)
         {
@@ -117,42 +127,77 @@ int main (){
         }
         else
         {
-//            cout << "t: " << t << endl;
-//            cout << "Inc: " << imuIncli << " ; Ori: "  << imuOrien << endl;
-            m1.SetVelocity(psr);
-            model.UpdateSystem(psr, imuIncli);
+            //Compute error
+            error=(psr+incli)-imuIncli;
+            //        cout << "incli: " << incli << " ; imuIncli: "  << imuIncli << endl;
+            //Controller command
+            cs = error > scon;
+            m1.SetVelocity(cs);
+            model.UpdateSystem(cs, imuIncli);
             model.GetSystemBlock(sys[0]);
             tuner.TuneIsom(sys,con);
         }
+//        con.GetParameters(kp,kd,fex);
+        sysk=sys[0].GetZTransferFunction(num,den);
+        sys[0].GetMagnitudeAndPhase(dts,wgc,smag,sphi);
+
+        condata << t << ", " << kp << ", " << kd << ", " << fex   << endl;
+        sysdatamp << t << ", " << smag << ", " << (sphi) <<  endl;
+        timeresp << t << ", " << (imuIncli>filterSensor) << ", " << m1.GetPosition() <<  endl;
+
+        sysdatanum << t;
+        sysdatanum << ", " << num.back();
+        for (int i=num.size()-1; i>=0; i--)
+        {
+            sysdatanum << ", " << sysk*num[i];
+        }
+        sysdatanum << endl;
+
+        sysdataden << t;
+        sysdataden << ", " << den.back();
+        for (int i=den.size()-1; i>=0; i--)
+        {
+            sysdataden << ", " << den[i];
+
+        }
+        sysdataden << endl;
+        //        sysdatanum << ", " << smag << ", " << sphi;
+
+//        cout << t << ", " << kp << ", " << kd << ", " << fex   << endl;
+
         Ts.WaitSamplingTime();
     }
 
 
-    //initialize model
-    vector<double> theta={-1.0246, 0.0248015, 0.133564};
-    model.SetParamsVector(theta);
+
 
 
 
     //Main control loop
 
 
-    double incli=5, error=0, cs=0;
-    double kp = 0.0,kd = 0.0,fex = 0.0;
-    double smag = 0.0,sphi = 0.0;
-    double sysk=0;
-    interval=30; //in seconds
+    incli=10; //initial incli
+    double interval=10; //in seconds
 
-    for (long rep=0;rep<4;rep++)
+    for (long rep=0;rep<7;rep++)
     {
 
-        incli=incli+5;
+        if (rep <4)
+        {
+            incli=incli+5;
 
-    for (double t=rep*interval;t<rep*interval+interval; t+=dts)
+        }
+        else
+        {
+            incli=incli-5;
+
+        }
+
+    for (double t=tinit+rep*interval;t<tinit+rep*interval+interval; t+=dts)
     {
 
 
-        psr=+0.2*((rand() % 10)-5); //new pseudorandom data
+        psr=+0.5*((rand() % 10)-5); //new pseudorandom data
 
         //    incli=incli+psr;
         //    orien=0;
@@ -173,7 +218,7 @@ int main (){
             //        cout << "incli: " << incli << " ; imuIncli: "  << imuIncli << endl;
 
             //Controller command
-            cs = error > scon;
+            cs = error > con;
             m1.SetVelocity(cs);
             //            cout << "cs: " << cs << " ; error: "  << error << endl;
             //Update model
@@ -191,10 +236,9 @@ int main (){
             sys[0].GetMagnitudeAndPhase(dts,wgc,smag,sphi);
 
 
-            if (sphi<-0.9)
+            if (sphi<0 & smag>0.1)
             {
                 tuner.TuneIsom(sys,con);
-                con.GetParameters(kp,kd,fex);
 //                con.PrintParameters();
 
 //                vector<double> sparams;
@@ -206,7 +250,7 @@ int main (){
 //                cout << endl;
             }
 
-
+            con.GetParameters(kp,kd,fex);
 
         }
 
@@ -214,6 +258,7 @@ int main (){
 
         condata << t << ", " << kp << ", " << kd << ", " << fex   << endl;
         sysdatamp << t << ", " << smag << ", " << (sphi) <<  endl;
+        timeresp << t << ", " << (imuIncli>filterSensor) << ", " << m1.GetPosition() <<  endl;
 
         sysdatanum << t;
         sysdatanum << ", " << num.back();
@@ -232,6 +277,8 @@ int main (){
         }
         sysdataden << endl;
         //        sysdatanum << ", " << smag << ", " << sphi;
+
+//        cout << t << ", " << kp << ", " << kd << ", " << fex   << endl;
 
         Ts.WaitSamplingTime();
 
@@ -255,6 +302,7 @@ int main (){
 
     condata.close();
 
+    timeresp.close();
 
 
     return 0;
