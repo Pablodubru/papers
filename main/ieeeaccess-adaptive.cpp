@@ -27,7 +27,7 @@ int main (){
 
     //--sensor--
     SerialArduino imu;
-    double imuIncli=0,imuOrien,imuIncliOld=0;
+    double imuIncli=0,filtIncli=0,imuOrien,filtIncliOld=0;
     SystemBlock imuFilter(0.09516,0,- 0.9048,1); //w=5
 
     //    sleep(4); //wait for sensor
@@ -44,7 +44,7 @@ int main (){
     SamplingTime Ts(dts);
 
     /// System identification
-    double wf=2;
+    double wf=1;
 
     SystemBlock filterSensor(wf*dts,wf*dts,wf*dts-2,2+wf*dts); //w*dts*(z+1)/(z*(2+w*dts)+(w*dts-2));
     SystemBlock filterSignal(wf*dts,wf*dts,wf*dts-2,2+wf*dts); //w*dts*(z+1)/(z*(2+w*dts)+(w*dts-2));
@@ -53,7 +53,7 @@ int main (){
 
     ulong numOrder=0,denOrder=2;
     SystemBlock filter(wf*dts,wf*dts,wf*dts-2,2+wf*dts); //w*dts*(z+1)/(z*(2+w*dts)+(w*dts-2));
-    OnlineSystemIdentification model(numOrder, denOrder, filter, 0.98, 0.8, 30 );
+    OnlineSystemIdentification model(numOrder, denOrder, filter, 0.95, 0.95, 30 );
 
     vector<double> num(numOrder+1),den(denOrder+1); //(order 0 also counts)
 //    SystemBlock integral(0,1,-1,1);
@@ -64,10 +64,11 @@ int main (){
 
     ///Controller and tuning
 //    FPDBlock con(0,0,0,dts);
-    FPDBlock con(0.15,0.03,0.75,dts);
+//    FPDBlock con(0.15,0.03,0.75,dts);
     FPDBlock scon(0.23,0.36,-0.6,dts);
+    FPDBlock con(0.23,0.36,-0.6,dts);
 
-    double wgc=2;
+    double wgc=3;
 //    FPDTuner tuner ( 100, wgc, dts);//ok second order (0,2)+integrator derivative control unstable
     FPDTuner tuner ( 50, wgc, dts);//ok second order (0,2)+integrator integral control
 
@@ -86,7 +87,7 @@ int main (){
     m1.Reset();
     m1.SwitchOn();
     //    m1.SetupPositionMode(10,10);
-    m1.Setup_Velocity_Mode(10);
+    m1.Setup_Velocity_Mode(20);
     //  m1.Setup_Torque_Mode();
 
 
@@ -106,44 +107,52 @@ int main (){
     model.SetParamsVector(theta);
 
     double psr; //pseudorandom
-    double tinit=100; //in seconds
+    double tinit=20; //in seconds
     double incli=5, error=0, cs=0;
 
     double kp = 0.0,kd = 0.0,fex = 0.0;
     double smag = 0.0,sphi = 0.0;
     double sysk=0;
 
+    con.GetParameters(kp,kd,fex);
 
     //populate system matrices
     for (double t=0;t<tinit; t+=dts)
     {
-        psr=+5*( 1+0.5*( sin(wgc*t) + sin(10*wgc*t) ) + 0.5*(0+(rand() % 10)-5) ); //pseudorandom
-        imuIncliOld=imuIncli;
+        psr=+5*( 1+0.5*( sin(wgc*t) + sin(10*wgc*t) ) + 0.1*(0+(rand() % 10)-5) ); //pseudorandom
         if (imu.readSensor(imuIncli,imuOrien) <0)
         {
-            cout << "Initializing sensor! " ;
+            cout << "Initializing sensor! ";
             //Sensor error, do nothing.
             cout << "Inc: " << imuIncli << " ; Ori: "  << imuOrien << endl;
         }
         else
         {
+            filtIncliOld=filtIncli;
+            filtIncli=(imuIncli>filterSensor);
             //Compute error
             error=(psr+incli)-imuIncli;
             //        cout << "incli: " << incli << " ; imuIncli: "  << imuIncli << endl;
             //Controller command
             cs = error > scon;
             m1.SetVelocity(cs);
-            model.UpdateSystem(cs, imuIncli);
+            //update Model
+//            if(abs((cs))>0.1)
+//            if( abs(filtIncli-filtIncliOld) > 0.1)
+            {
+                model.UpdateSystem(cs, imuIncli);
+//                cout << "cs: " << cs << " ; imuIncli: "  << imuIncli << endl;
+            }
+//            model.UpdateSystem(cs, imuIncli);
             model.GetSystemBlock(sys[0]);
             tuner.TuneIsom(sys,con);
         }
-//        con.GetParameters(kp,kd,fex);
         sysk=sys[0].GetZTransferFunction(num,den);
         sys[0].GetMagnitudeAndPhase(dts,wgc,smag,sphi);
 
         condata << t << ", " << kp << ", " << kd << ", " << fex   << endl;
         sysdatamp << t << ", " << smag << ", " << (sphi) <<  endl;
-        timeresp << t << ", " << (imuIncli>filterSensor) << ", " << m1.GetPosition() <<  endl;
+        timeresp << t << ", " << filtIncli << ", " << m1.GetPosition() <<  endl;
 
         sysdatanum << t;
         sysdatanum << ", " << num.back();
@@ -197,13 +206,13 @@ int main (){
     {
 
 
-        psr=+0.5*((rand() % 10)-5); //new pseudorandom data
+        psr=+0.2*((rand() % 10)-5); //new pseudorandom data
 
         //    incli=incli+psr;
         //    orien=0;
 
         ///read sensor
-        imuIncliOld=imuIncli;
+        filtIncliOld=imuIncli;
         if (imu.readSensor(imuIncli,imuOrien) <0)
         {
             cout << "Sensor error! ";
@@ -212,6 +221,8 @@ int main (){
         }
         else
         {
+            filtIncliOld=filtIncli;
+            filtIncli=(imuIncli>filterSensor);
             //            imuIncli = imuIncli > imuFilter;
             //Compute error
             error=(psr+incli)-imuIncli;
@@ -220,11 +231,14 @@ int main (){
             //Controller command
             cs = error > con;
             m1.SetVelocity(cs);
-            //            cout << "cs: " << cs << " ; error: "  << error << endl;
+//            cout << "cs: " << cs << " ; error: "  << error << endl;
             //Update model
-
-            model.UpdateSystem(cs, imuIncli);
-//            cout << "cs: " << cs << " ; imuIncli: "  << imuIncli << endl;
+//            if(abs((cs))>0.1)
+//            if( abs(filtIncli-filtIncliOld) > 0.1)
+            {
+                model.UpdateSystem(cs, imuIncli);
+//                cout << "cs: " << cs << " ; imuIncli: "  << imuIncli << endl;
+            }
 
 //            model.GetSystemBlock(sys[0]);
             model.GetAvgSystemBlock(sys[0]);
