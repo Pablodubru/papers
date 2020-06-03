@@ -32,11 +32,11 @@ int main (){
 
     //    sleep(4); //wait for sensor
 
-    ofstream sysdatanum("/home/humasoft/Escritorio/adasysnum000.csv",std::ofstream::out);
-    ofstream sysdataden("/home/humasoft/Escritorio/adasysden000.csv",std::ofstream::out);
-    ofstream condata("/home/humasoft/Escritorio/adacon000.csv",std::ofstream::out);
-    ofstream sysdatamp("/home/humasoft/Escritorio/sensor-response.csv",std::ofstream::out);
-    ofstream timeresp("/home/humasoft/Escritorio/time-response.csv",std::ofstream::out);
+    ofstream sysdatanum("/home/humasoft/Escritorio/adasysnum600.csv",std::ofstream::out);
+    ofstream sysdataden("/home/humasoft/Escritorio/adasysden600.csv",std::ofstream::out);
+    ofstream condata("/home/humasoft/Escritorio/adacon600.csv",std::ofstream::out);
+    ofstream sysdatamp("/home/humasoft/Escritorio/adasensor600response.csv",std::ofstream::out);
+    ofstream timeresp("/home/humasoft/Escritorio/ada600response.csv",std::ofstream::out);
 
 
     //Samplinfg time
@@ -57,7 +57,9 @@ int main (){
 
     vector<double> num(numOrder+1),den(denOrder+1); //(order 0 also counts)
 //    SystemBlock integral(0,1,-1,1);
-    vector<SystemBlock> sys = {SystemBlock(num,den)}; //the resulting identification
+//    vector<SystemBlock> sys = {SystemBlock(num,den)}; //the resulting identification
+    SystemBlock sys(num,den); //the resulting identification
+
 //    double sysk=0, syskAverage=0.1;
 
 
@@ -65,15 +67,16 @@ int main (){
     ///Controller and tuning
 //    FPDBlock con(0,0,0,dts);
 //    FPDBlock con(0.15,0.03,0.75,dts);
-    FPDBlock scon(0.23,0.36,-0.6,dts);
+    FPDBlock scon(0.2547,0.7730,-0.6,dts);
     FPDBlock con(0.23,0.36,-0.6,dts);
+    vector<double> conparam{0.23,0.36,-0.6};
 
     double wgc=3;
 //    FPDTuner tuner ( 100, wgc, dts);//ok second order (0,2)+integrator derivative control unstable
     FPDTuner tuner ( 50, wgc, dts);//ok second order (0,2)+integrator integral control
 
 
-    PIDBlock intcon(0.1,0,0.1,dts);
+    PIDBlock intcon(0.2547,0.7730,0,dts);
     //double phi,mag,w=1;
 
 
@@ -144,11 +147,11 @@ int main (){
 //                cout << "cs: " << cs << " ; imuIncli: "  << imuIncli << endl;
             }
 //            model.UpdateSystem(cs, imuIncli);
-            model.GetSystemBlock(sys[0]);
+            model.GetSystemBlock(sys);
             tuner.TuneIsom(sys,con);
         }
-        sysk=sys[0].GetZTransferFunction(num,den);
-        sys[0].GetMagnitudeAndPhase(dts,wgc,smag,sphi);
+        sysk=sys.GetZTransferFunction(num,den);
+        sys.GetMagnitudeAndPhase(dts,wgc,smag,sphi);
 
         condata << t << ", " << kp << ", " << kd << ", " << fex   << endl;
         sysdatamp << t << ", " << smag << ", " << (sphi) <<  endl;
@@ -241,18 +244,22 @@ int main (){
             }
 
 //            model.GetSystemBlock(sys[0]);
-            model.GetAvgSystemBlock(sys[0]);
+            model.GetAvgSystemBlock(sys);
 //            model.PrintZTransferFunction(dts);
 
 
-            sysk=sys[0].GetZTransferFunction(num,den);
+            sysk=sys.GetZTransferFunction(num,den);
 
-            sys[0].GetMagnitudeAndPhase(dts,wgc,smag,sphi);
+            sys.GetMagnitudeAndPhase(dts,wgc,smag,sphi);
 
 
             if (sphi<0 & smag>0.1)
             {
-                tuner.TuneIsom(sys,con);
+//                tuner.TuneIsom(sys,con);
+
+                //revision
+                tuner.TuneIsom(sys, conparam);
+                con.ParameterUpdate(conparam);
 //                con.PrintParameters();
 
 //                vector<double> sparams;
