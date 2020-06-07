@@ -32,11 +32,11 @@ int main (){
 
     //    sleep(4); //wait for sensor
 
-    ofstream sysdatanum("/home/humasoft/Escritorio/adasysnum600.csv",std::ofstream::out);
-    ofstream sysdataden("/home/humasoft/Escritorio/adasysden600.csv",std::ofstream::out);
-    ofstream condata("/home/humasoft/Escritorio/adacon600.csv",std::ofstream::out);
-    ofstream sysdatamp("/home/humasoft/Escritorio/adasensor600response.csv",std::ofstream::out);
-    ofstream timeresp("/home/humasoft/Escritorio/ada600response.csv",std::ofstream::out);
+    ofstream sysdatanum("/home/humasoft/Escritorio/adasysnum000.csv",std::ofstream::out);
+    ofstream sysdataden("/home/humasoft/Escritorio/adasysden000.csv",std::ofstream::out);
+    ofstream condata("/home/humasoft/Escritorio/adacon000.csv",std::ofstream::out);
+    ofstream sysdatamp("/home/humasoft/Escritorio/adasensor000response.csv",std::ofstream::out);
+    ofstream timeresp("/home/humasoft/Escritorio/ada000response.csv",std::ofstream::out);
 
 
     //Samplinfg time
@@ -111,7 +111,7 @@ int main (){
 
     double psr; //pseudorandom
     double tinit=20; //in seconds
-    double incli=5, error=0, cs=0;
+    double incli=5, error=0, cs=0, csf=0;
 
     double kp = 0.0,kd = 0.0,fex = 0.0;
     double smag = 0.0,sphi = 0.0;
@@ -155,7 +155,8 @@ int main (){
 
         condata << t << ", " << kp << ", " << kd << ", " << fex   << endl;
         sysdatamp << t << ", " << smag << ", " << (sphi) <<  endl;
-        timeresp << t << ", " << filtIncli << ", " << m1.GetPosition() <<  endl;
+        timeresp << t << ", " << filtIncli << ", " << csf << ", " << m1.GetPosition() ;
+        timeresp << ", " << imuIncli<< ", " << cs << ", " << m1.GetVelocity()  <<  endl;
 
         sysdatanum << t;
         sysdatanum << ", " << num.back();
@@ -233,6 +234,7 @@ int main (){
 
             //Controller command
             cs = error > con;
+            csf = cs > filterSignal;
             m1.SetVelocity(cs);
 //            cout << "cs: " << cs << " ; error: "  << error << endl;
             //Update model
@@ -279,7 +281,8 @@ int main (){
 
         condata << t << ", " << kp << ", " << kd << ", " << fex   << endl;
         sysdatamp << t << ", " << smag << ", " << (sphi) <<  endl;
-        timeresp << t << ", " << (imuIncli>filterSensor) << ", " << m1.GetPosition() <<  endl;
+        timeresp << t << ", " << filtIncli << ", " << csf << ", " << m1.GetPosition() ;
+        timeresp << ", " << imuIncli<< ", " << cs << ", " << m1.GetVelocity()  <<  endl;
 
         sysdatanum << t;
         sysdatanum << ", " << num.back();
