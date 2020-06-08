@@ -189,13 +189,14 @@ int main (){
     //Main control loop
 
 
-    incli=10; //initial incli
-    double interval=10; //in seconds
+    incli=15; //initial incli
+    double interval=30; //in seconds
+    double nrep=1;
 
-    for (long rep=0;rep<7;rep++)
+    for (long rep=0;rep<nrep;rep++)
     {
 
-        if (rep <4)
+        if (rep <nrep/2)
         {
             incli=incli+5;
 
