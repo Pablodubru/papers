@@ -313,7 +313,6 @@ void checkbuffersensor(){
 
 }
 int main(){
-    checkbuffersensor();
-
+    capturedata();
 
 }
