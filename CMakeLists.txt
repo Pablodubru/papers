@@ -16,9 +16,6 @@ INCLUDE_DIRECTORIES(kinematics)
 add_library(kinematics kinematics/Kinematics.cpp)
 set(SUBDIR_LINK_NAMES ${SUBDIR_LINK_NAMES} kinematics)
 
-
-
-
 #find_package(libplot)
 
 INCLUDE_DIRECTORIES(${SUBDIR_INCLUDE_DIRECTORIES})

@@ -200,9 +200,9 @@ void capturedata(){
 
     for(double t=dts;t<100;t=t+dts){
         f=f+0.0002;
-        isignal1 = (1+2.5*sin(f*t));
-        isignal2 = (1+2.5*sin(f*t+M_PI*2/3));
-        isignal3 = (1+2.5*sin(f*t+M_PI*4/3));
+        isignal1 = (1+3.5*sin(f*t));
+        isignal2 = (1+3.5*sin(f*t+M_PI*2/3));
+        isignal3 = (1+3.5*sin(f*t+M_PI*4/3));
 //        isignal1 = (1+5*sin(2*sin(t)+cos(t)));
 //        isignal2 = (1+5*sin(2*sin(t+M_PI*2/3)+cos(t+M_PI*2/3)));
 //        isignal3 = (1+5*sin(2*sin(t+M_PI*4/3)+cos(t+M_PI*4/3)));
