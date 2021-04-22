@@ -198,11 +198,11 @@ void capturedata(){
 
     double psr = 0.0, isignal1 = 0.0, isignal2 = 0.0, isignal3 = 0.0;
 
-    for(double t=dts;t<100;t=t+dts){
+    for(double t=dts;t<3600;t=t+dts){
         f=f+0.0002;
-        isignal1 = (1+3.5*sin(f*t));
-        isignal2 = (1+3.5*sin(f*t+M_PI*2/3));
-        isignal3 = (1+3.5*sin(f*t+M_PI*4/3));
+        isignal1 = (0.6+sin(2*sin(t)+cos(t)))*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/2;
+        isignal2 = (0.6+sin(2*sin(t+M_PI*2/3)+cos(t+M_PI*2/3)))*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/2;
+        isignal3 = (0.6+sin(2*sin(t+M_PI*4/3)+cos(t+M_PI*4/3)))*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/2;
 //        isignal1 = (1+5*sin(2*sin(t)+cos(t)));
 //        isignal2 = (1+5*sin(2*sin(t+M_PI*2/3)+cos(t+M_PI*2/3)));
 //        isignal3 = (1+5*sin(2*sin(t+M_PI*4/3)+cos(t+M_PI*4/3)));
@@ -313,6 +313,6 @@ void checkbuffersensor(){
 
 }
 int main(){
-    checkbuffersensor();
+    capturedata();
 
 }
