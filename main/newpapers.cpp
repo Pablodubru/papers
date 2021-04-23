@@ -203,9 +203,9 @@ void capturedata(){
         isignal1 = (0.6+sin(2*sin(t)+cos(t)))*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/2;
         isignal2 = (0.6+sin(2*sin(t+M_PI*2/3)+cos(t+M_PI*2/3)))*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/2;
         isignal3 = (0.6+sin(2*sin(t+M_PI*4/3)+cos(t+M_PI*4/3)))*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/2;
-//        isignal1 = (1+5*sin(2*sin(t)+cos(t)));
-//        isignal2 = (1+5*sin(2*sin(t+M_PI*2/3)+cos(t+M_PI*2/3)));
-//        isignal3 = (1+5*sin(2*sin(t+M_PI*4/3)+cos(t+M_PI*4/3)));
+        //        isignal1 = (1+5*sin(2*sin(t)+cos(t)));
+        //        isignal2 = (1+5*sin(2*sin(t+M_PI*2/3)+cos(t+M_PI*2/3)));
+        //        isignal3 = (1+5*sin(2*sin(t+M_PI*4/3)+cos(t+M_PI*4/3)));
         m1.SetPosition(isignal1);
         m2.SetPosition(isignal2);
         m3.SetPosition(isignal3);
@@ -215,7 +215,7 @@ void capturedata(){
 
 
         cout<<"Read position: "<<m3.GetPosition()<<", vel: "<<m3.GetVelocity()
-            <<" and those amps:"<<m3.GetAmps()<<endl;
+           <<" and those amps:"<<m3.GetAmps()<<endl;
 
         EulerAngles = misensor.EulerAngles();
 
@@ -240,7 +240,7 @@ void testCircles(){
     time_t tt = std::chrono::system_clock::to_time_t(now);
     tm local_tm = *localtime(&tt);
     cout<<local_tm.tm_mon<<" "<<local_tm.tm_mday<<" "<<local_tm.tm_hour<<endl;
-    string address="/home/humasoft/code/papers/graficas/newpaper/Dataset"+to_string(local_tm.tm_mon)+"_"+to_string(local_tm.tm_mday)+"_"+to_string(local_tm.tm_hour)+"_"+to_string(local_tm.tm_min)+".csv";
+    string address="/home/humasoft/code/papers/graficas/newpaper/TestCircles"+to_string(local_tm.tm_mon)+"_"+to_string(local_tm.tm_mday)+"_"+to_string(local_tm.tm_hour)+"_"+to_string(local_tm.tm_min)+".csv";
     ofstream data(address,std::ofstream::out);
 
     SocketCanPort pm31("can1");
@@ -277,17 +277,17 @@ void testCircles(){
 
     misensor.set_streamon();
     double dts=0.02;
-    double f=0;
+    double f=3;
 
     SamplingTime Ts(dts);
 
     double psr = 0.0, isignal1 = 0.0, isignal2 = 0.0, isignal3 = 0.0;
 
-    for(double t=dts;t<3600;t=t+dts){
+    for(double t=dts;t<60;t=t+dts){
         f=f+0.0002;
-        isignal1 = (1.5+2*sin(f*t));
-        isignal3 = (1.5+2*sin(f*t+M_PI*2/3));
-        isignal2 = (1.5+2*sin(f*t+M_PI*4/3));
+        isignal1 = 1+2*sin(2*sin(t)+cos(t));
+        isignal2 = 1+2*sin(2*sin(t+M_PI*2/3)+cos(t+M_PI*2/3));
+        isignal3 = 1+2*sin(2*sin(t+M_PI*4/3)+cos(t+M_PI*4/3));
         m1.SetPosition(isignal1);
         m2.SetPosition(isignal2);
         m3.SetPosition(isignal3);
@@ -297,7 +297,7 @@ void testCircles(){
 
 
         cout<<"Read position: "<<m3.GetPosition()<<", vel: "<<m3.GetVelocity()
-            <<" and those amps:"<<m3.GetAmps()<<endl;
+           <<" and those amps:"<<m3.GetAmps()<<endl;
 
         EulerAngles = misensor.EulerAngles();
 
@@ -322,7 +322,7 @@ void testSinTendons(){
     time_t tt = std::chrono::system_clock::to_time_t(now);
     tm local_tm = *localtime(&tt);
     cout<<local_tm.tm_mon<<" "<<local_tm.tm_mday<<" "<<local_tm.tm_hour<<endl;
-    string address="/home/humasoft/code/papers/graficas/newpaper/Dataset"+to_string(local_tm.tm_mon)+"_"+to_string(local_tm.tm_mday)+"_"+to_string(local_tm.tm_hour)+"_"+to_string(local_tm.tm_min)+".csv";
+    string address="/home/humasoft/code/papers/graficas/newpaper/tESTsIN"+to_string(local_tm.tm_mon)+"_"+to_string(local_tm.tm_mday)+"_"+to_string(local_tm.tm_hour)+"_"+to_string(local_tm.tm_min)+".csv";
     ofstream data(address,std::ofstream::out);
 
     SocketCanPort pm31("can1");
@@ -359,39 +359,44 @@ void testSinTendons(){
 
     misensor.set_streamon();
     double dts=0.02;
-    double f=0;
+    double f=4;
 
     SamplingTime Ts(dts);
 
     double psr = 0.0, isignal1 = 0.0, isignal2 = 0.0, isignal3 = 0.0;
-    for(int t=1;t<=3;t++){
-        isignal1 = 0;
-        isignal2 = 0;
-        isignal3 = 0;
-    for(double t=dts;t<3600;t=t+dts){
-        f=f+0.0002;
+    vector<double> signals(4,0);
+    for(int d=1;d<=3;d++){
+        signals[1]= -0.5;
+        signals[2] = -0.5;
+        signals[3] = -0.5;
+        for(double t=dts;t<20;t=t+dts){
+            f=f+0.0002;
+            signals[d]=0.5+2*sin(f*t);
+            m1.SetPosition(signals[1]);
+            m2.SetPosition(signals[2]);
+            m3.SetPosition(signals[3]);
+            //m2.SetPosition(0);
+            cout << "t: "<< t << ", pos: " << isignal1 << endl;
+            Ts.WaitSamplingTime();
 
-        m1.SetPosition(isignal1);
-        m2.SetPosition(isignal2);
-        m3.SetPosition(isignal3);
-        //m2.SetPosition(0);
-        cout << "t: "<< t << ", pos: " << isignal1 << endl;
-        Ts.WaitSamplingTime();
 
+            cout<<"Read position: "<<m3.GetPosition()<<", vel: "<<m3.GetVelocity()
+               <<" and those amps:"<<m3.GetAmps()<<endl;
 
-        cout<<"Read position: "<<m3.GetPosition()<<", vel: "<<m3.GetVelocity()
-            <<" and those amps:"<<m3.GetAmps()<<endl;
+            EulerAngles = misensor.EulerAngles();
 
-        EulerAngles = misensor.EulerAngles();
+            cout << "ROLL: " << EulerAngles[0] << " ; PITCH: "  << EulerAngles[1] << endl;
 
-        cout << "ROLL: " << EulerAngles[0] << " ; PITCH: "  << EulerAngles[1] << endl;
-
-        data << t << ", "  << isignal1 << ", "<< isignal2 << ", "<< isignal3 << ", "
-             << m1.GetPosition() <<", "<< m1.GetVelocity() <<", "<< m1.GetAmps() <<", "
-             << m2.GetPosition() <<", "<< m2.GetVelocity()<<", "<< m2.GetAmps() <<", "
-             << m3.GetPosition() <<", "<< m3.GetVelocity()<<", "<< m3.GetAmps() <<", "
-             <<  EulerAngles[0] << ", " << EulerAngles[1] << endl;
-    }
+            data << t << ", "  << isignal1 << ", "<< isignal2 << ", "<< isignal3 << ", "
+                 << m1.GetPosition() <<", "<< m1.GetVelocity() <<", "<< m1.GetAmps() <<", "
+                 << m2.GetPosition() <<", "<< m2.GetVelocity()<<", "<< m2.GetAmps() <<", "
+                 << m3.GetPosition() <<", "<< m3.GetVelocity()<<", "<< m3.GetAmps() <<", "
+                 <<  EulerAngles[0] << ", " << EulerAngles[1] << endl;
+        }
+        m1.SetPosition(0);
+        m2.SetPosition(0);
+        m3.SetPosition(0);
+        sleep(3);
     }
     m1.SetPosition(0);
     m2.SetPosition(0);
@@ -406,7 +411,7 @@ void teststepTendons(){
     time_t tt = std::chrono::system_clock::to_time_t(now);
     tm local_tm = *localtime(&tt);
     cout<<local_tm.tm_mon<<" "<<local_tm.tm_mday<<" "<<local_tm.tm_hour<<endl;
-    string address="/home/humasoft/code/papers/graficas/newpaper/Dataset"+to_string(local_tm.tm_mon)+"_"+to_string(local_tm.tm_mday)+"_"+to_string(local_tm.tm_hour)+"_"+to_string(local_tm.tm_min)+".csv";
+    string address="/home/humasoft/code/papers/graficas/newpaper/TestSteps"+to_string(local_tm.tm_mon)+"_"+to_string(local_tm.tm_mday)+"_"+to_string(local_tm.tm_hour)+"_"+to_string(local_tm.tm_min)+".csv";
     ofstream data(address,std::ofstream::out);
 
     SocketCanPort pm31("can1");
@@ -448,35 +453,39 @@ void teststepTendons(){
     SamplingTime Ts(dts);
 
     double psr = 0.0, isignal1 = 0.0, isignal2 = 0.0, isignal3 = 0.0;
+    vector<double> signals(4,0);
+    for(int d=1;d<=3;d++){
+        signals[1]= -0.5;
+        signals[2] = -0.5;
+        signals[3] = -0.5;
+        for(double t=dts;t<8;t=t+dts){
+            f=f+0.0002;
+            signals[d]=5;
+            m1.SetPosition(signals[1]);
+            m2.SetPosition(signals[2]);
+            m3.SetPosition(signals[3]);
+            //m2.SetPosition(0);
+            cout << "t: "<< t << ", pos: " << isignal1 << endl;
+            Ts.WaitSamplingTime();
 
-    for(double t=dts;t<3600;t=t+dts){
-        f=f+0.0002;
-        isignal1 = (0.6+sin(2*sin(t)+cos(t)))*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/2;
-        isignal2 = (0.6+sin(2*sin(t+M_PI*2/3)+cos(t+M_PI*2/3)))*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/2;
-        isignal3 = (0.6+sin(2*sin(t+M_PI*4/3)+cos(t+M_PI*4/3)))*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/2;
-//        isignal1 = (1+5*sin(2*sin(t)+cos(t)));
-//        isignal2 = (1+5*sin(2*sin(t+M_PI*2/3)+cos(t+M_PI*2/3)));
-//        isignal3 = (1+5*sin(2*sin(t+M_PI*4/3)+cos(t+M_PI*4/3)));
-        m1.SetPosition(isignal1);
-        m2.SetPosition(isignal2);
-        m3.SetPosition(isignal3);
-        //m2.SetPosition(0);
-        cout << "t: "<< t << ", pos: " << isignal1 << endl;
-        Ts.WaitSamplingTime();
 
+            cout<<"Read position: "<<m3.GetPosition()<<", vel: "<<m3.GetVelocity()
+               <<" and those amps:"<<m3.GetAmps()<<endl;
 
-        cout<<"Read position: "<<m3.GetPosition()<<", vel: "<<m3.GetVelocity()
-            <<" and those amps:"<<m3.GetAmps()<<endl;
+            EulerAngles = misensor.EulerAngles();
 
-        EulerAngles = misensor.EulerAngles();
+            cout << "ROLL: " << EulerAngles[0] << " ; PITCH: "  << EulerAngles[1] << endl;
 
-        cout << "ROLL: " << EulerAngles[0] << " ; PITCH: "  << EulerAngles[1] << endl;
-
-        data << t << ", "  << isignal1 << ", "<< isignal2 << ", "<< isignal3 << ", "
-             << m1.GetPosition() <<", "<< m1.GetVelocity() <<", "<< m1.GetAmps() <<", "
-             << m2.GetPosition() <<", "<< m2.GetVelocity()<<", "<< m2.GetAmps() <<", "
-             << m3.GetPosition() <<", "<< m3.GetVelocity()<<", "<< m3.GetAmps() <<", "
-             <<  EulerAngles[0] << ", " << EulerAngles[1] << endl;
+            data << t << ", "  << isignal1 << ", "<< isignal2 << ", "<< isignal3 << ", "
+                 << m1.GetPosition() <<", "<< m1.GetVelocity() <<", "<< m1.GetAmps() <<", "
+                 << m2.GetPosition() <<", "<< m2.GetVelocity()<<", "<< m2.GetAmps() <<", "
+                 << m3.GetPosition() <<", "<< m3.GetVelocity()<<", "<< m3.GetAmps() <<", "
+                 <<  EulerAngles[0] << ", " << EulerAngles[1] << endl;
+        }
+        m1.SetPosition(0);
+        m2.SetPosition(0);
+        m3.SetPosition(0);
+        sleep(3);
     }
     m1.SetPosition(0);
     m2.SetPosition(0);
@@ -538,9 +547,9 @@ void checkbuffersensor(){
     for(double t=dts;t<100;t=t+dts){
         f=f+0.0002;
         isignal1 = (2+2*sin(f*t));
-//        isignal1 = (1+5*sin(2*sin(t)+cos(t)));
-//        isignal2 = (1+5*sin(2*sin(t+M_PI*2/3)+cos(t+M_PI*2/3)));
-//        isignal3 = (1+5*sin(2*sin(t+M_PI*4/3)+cos(t+M_PI*4/3)));
+        //        isignal1 = (1+5*sin(2*sin(t)+cos(t)));
+        //        isignal2 = (1+5*sin(2*sin(t+M_PI*2/3)+cos(t+M_PI*2/3)));
+        //        isignal3 = (1+5*sin(2*sin(t+M_PI*4/3)+cos(t+M_PI*4/3)));
         m1.SetPosition(isignal1);
         //m2.SetPosition(0);
         cout << "t: "<< t << ", pos: " << isignal1 << endl;
@@ -548,13 +557,13 @@ void checkbuffersensor(){
         Ts.WaitSamplingTime();
 
         cout<<"Read position: "<<m3.GetPosition()<<", vel: "<<m3.GetVelocity()
-            <<" and those amps:"<<m3.GetAmps()<<endl;
+           <<" and those amps:"<<m3.GetAmps()<<endl;
 
         EulerAngles = misensor.EulerAngles();
 
         cout << "ROLL: " << EulerAngles[0] << " ; PITCH: "  << EulerAngles[1] << endl;
 
-       data << t << ", "  << isignal1 << ", "<< m1.GetPosition() <<", "<< m1.GetVelocity()
+        data << t << ", "  << isignal1 << ", "<< m1.GetPosition() <<", "<< m1.GetVelocity()
              <<", "<< m1.GetAmps() <<", "<<  EulerAngles[0] << ", " << EulerAngles[2] << endl;
     }
     m1.SetPosition(0);
@@ -565,6 +574,9 @@ void checkbuffersensor(){
 
 }
 int main(){
-    capturedata();
+    //teststepTendons();
+    testSinTendons();
+    //testCircles();
+    //capturedata();
 
 }
