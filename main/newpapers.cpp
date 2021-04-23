@@ -234,6 +234,258 @@ void capturedata(){
 
 
 }
+void testCircles(){
+
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    time_t tt = std::chrono::system_clock::to_time_t(now);
+    tm local_tm = *localtime(&tt);
+    cout<<local_tm.tm_mon<<" "<<local_tm.tm_mday<<" "<<local_tm.tm_hour<<endl;
+    string address="/home/humasoft/code/papers/graficas/newpaper/Dataset"+to_string(local_tm.tm_mon)+"_"+to_string(local_tm.tm_mday)+"_"+to_string(local_tm.tm_hour)+"_"+to_string(local_tm.tm_min)+".csv";
+    ofstream data(address,std::ofstream::out);
+
+    SocketCanPort pm31("can1");
+    CiA402SetupData sd31(2048,24,0.001, 0.144, 20);
+    CiA402Device m1 (1, &pm31, &sd31);
+    m1.Reset();
+    m1.SwitchOn();
+    m1.SetupPositionMode(10,10);
+
+    SocketCanPort pm2("can1");
+    CiA402SetupData sd32(2048,24,0.001, 0.144, 20);
+    CiA402Device m2 (2, &pm2, &sd32);
+    m2.Reset();
+    m2.SwitchOn();
+    m2.SetupPositionMode(10,10);
+
+    SocketCanPort pm3("can1");
+    CiA402SetupData sd33(2048,24,0.001, 0.144, 20);
+    CiA402Device m3 (3, &pm3, &sd33);
+    m3.Reset();
+    m3.SwitchOn();
+    m3.SetupPositionMode(10,10);
+
+    IMU3DMGX510 misensor("/dev/ttyUSB0");
+
+    misensor.set_IDLEmode();
+    misensor.set_freq(10);
+    misensor.set_devicetogetgyroacc();
+    misensor.set_streamon();
+    cout << "Calibrating IMU..." << endl;
+    misensor.calibrate();
+    cout << "Calibration done" << endl;
+    double *EulerAngles;
+
+    misensor.set_streamon();
+    double dts=0.02;
+    double f=0;
+
+    SamplingTime Ts(dts);
+
+    double psr = 0.0, isignal1 = 0.0, isignal2 = 0.0, isignal3 = 0.0;
+
+    for(double t=dts;t<3600;t=t+dts){
+        f=f+0.0002;
+        isignal1 = (1.5+2*sin(f*t));
+        isignal3 = (1.5+2*sin(f*t+M_PI*2/3));
+        isignal2 = (1.5+2*sin(f*t+M_PI*4/3));
+        m1.SetPosition(isignal1);
+        m2.SetPosition(isignal2);
+        m3.SetPosition(isignal3);
+        //m2.SetPosition(0);
+        cout << "t: "<< t << ", pos: " << isignal1 << endl;
+        Ts.WaitSamplingTime();
+
+
+        cout<<"Read position: "<<m3.GetPosition()<<", vel: "<<m3.GetVelocity()
+            <<" and those amps:"<<m3.GetAmps()<<endl;
+
+        EulerAngles = misensor.EulerAngles();
+
+        cout << "ROLL: " << EulerAngles[0] << " ; PITCH: "  << EulerAngles[1] << endl;
+
+        data << t << ", "  << isignal1 << ", "<< isignal2 << ", "<< isignal3 << ", "
+             << m1.GetPosition() <<", "<< m1.GetVelocity() <<", "<< m1.GetAmps() <<", "
+             << m2.GetPosition() <<", "<< m2.GetVelocity()<<", "<< m2.GetAmps() <<", "
+             << m3.GetPosition() <<", "<< m3.GetVelocity()<<", "<< m3.GetAmps() <<", "
+             <<  EulerAngles[0] << ", " << EulerAngles[1] << endl;
+    }
+    m1.SetPosition(0);
+    m2.SetPosition(0);
+    m3.SetPosition(0);
+
+
+
+}
+void testSinTendons(){
+
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    time_t tt = std::chrono::system_clock::to_time_t(now);
+    tm local_tm = *localtime(&tt);
+    cout<<local_tm.tm_mon<<" "<<local_tm.tm_mday<<" "<<local_tm.tm_hour<<endl;
+    string address="/home/humasoft/code/papers/graficas/newpaper/Dataset"+to_string(local_tm.tm_mon)+"_"+to_string(local_tm.tm_mday)+"_"+to_string(local_tm.tm_hour)+"_"+to_string(local_tm.tm_min)+".csv";
+    ofstream data(address,std::ofstream::out);
+
+    SocketCanPort pm31("can1");
+    CiA402SetupData sd31(2048,24,0.001, 0.144, 20);
+    CiA402Device m1 (1, &pm31, &sd31);
+    m1.Reset();
+    m1.SwitchOn();
+    m1.SetupPositionMode(10,10);
+
+    SocketCanPort pm2("can1");
+    CiA402SetupData sd32(2048,24,0.001, 0.144, 20);
+    CiA402Device m2 (2, &pm2, &sd32);
+    m2.Reset();
+    m2.SwitchOn();
+    m2.SetupPositionMode(10,10);
+
+    SocketCanPort pm3("can1");
+    CiA402SetupData sd33(2048,24,0.001, 0.144, 20);
+    CiA402Device m3 (3, &pm3, &sd33);
+    m3.Reset();
+    m3.SwitchOn();
+    m3.SetupPositionMode(10,10);
+
+    IMU3DMGX510 misensor("/dev/ttyUSB0");
+
+    misensor.set_IDLEmode();
+    misensor.set_freq(10);
+    misensor.set_devicetogetgyroacc();
+    misensor.set_streamon();
+    cout << "Calibrating IMU..." << endl;
+    misensor.calibrate();
+    cout << "Calibration done" << endl;
+    double *EulerAngles;
+
+    misensor.set_streamon();
+    double dts=0.02;
+    double f=0;
+
+    SamplingTime Ts(dts);
+
+    double psr = 0.0, isignal1 = 0.0, isignal2 = 0.0, isignal3 = 0.0;
+    for(int t=1;t<=3;t++){
+        isignal1 = 0;
+        isignal2 = 0;
+        isignal3 = 0;
+    for(double t=dts;t<3600;t=t+dts){
+        f=f+0.0002;
+
+        m1.SetPosition(isignal1);
+        m2.SetPosition(isignal2);
+        m3.SetPosition(isignal3);
+        //m2.SetPosition(0);
+        cout << "t: "<< t << ", pos: " << isignal1 << endl;
+        Ts.WaitSamplingTime();
+
+
+        cout<<"Read position: "<<m3.GetPosition()<<", vel: "<<m3.GetVelocity()
+            <<" and those amps:"<<m3.GetAmps()<<endl;
+
+        EulerAngles = misensor.EulerAngles();
+
+        cout << "ROLL: " << EulerAngles[0] << " ; PITCH: "  << EulerAngles[1] << endl;
+
+        data << t << ", "  << isignal1 << ", "<< isignal2 << ", "<< isignal3 << ", "
+             << m1.GetPosition() <<", "<< m1.GetVelocity() <<", "<< m1.GetAmps() <<", "
+             << m2.GetPosition() <<", "<< m2.GetVelocity()<<", "<< m2.GetAmps() <<", "
+             << m3.GetPosition() <<", "<< m3.GetVelocity()<<", "<< m3.GetAmps() <<", "
+             <<  EulerAngles[0] << ", " << EulerAngles[1] << endl;
+    }
+    }
+    m1.SetPosition(0);
+    m2.SetPosition(0);
+    m3.SetPosition(0);
+
+
+
+}
+void teststepTendons(){
+
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    time_t tt = std::chrono::system_clock::to_time_t(now);
+    tm local_tm = *localtime(&tt);
+    cout<<local_tm.tm_mon<<" "<<local_tm.tm_mday<<" "<<local_tm.tm_hour<<endl;
+    string address="/home/humasoft/code/papers/graficas/newpaper/Dataset"+to_string(local_tm.tm_mon)+"_"+to_string(local_tm.tm_mday)+"_"+to_string(local_tm.tm_hour)+"_"+to_string(local_tm.tm_min)+".csv";
+    ofstream data(address,std::ofstream::out);
+
+    SocketCanPort pm31("can1");
+    CiA402SetupData sd31(2048,24,0.001, 0.144, 20);
+    CiA402Device m1 (1, &pm31, &sd31);
+    m1.Reset();
+    m1.SwitchOn();
+    m1.SetupPositionMode(10,10);
+
+    SocketCanPort pm2("can1");
+    CiA402SetupData sd32(2048,24,0.001, 0.144, 20);
+    CiA402Device m2 (2, &pm2, &sd32);
+    m2.Reset();
+    m2.SwitchOn();
+    m2.SetupPositionMode(10,10);
+
+    SocketCanPort pm3("can1");
+    CiA402SetupData sd33(2048,24,0.001, 0.144, 20);
+    CiA402Device m3 (3, &pm3, &sd33);
+    m3.Reset();
+    m3.SwitchOn();
+    m3.SetupPositionMode(10,10);
+
+    IMU3DMGX510 misensor("/dev/ttyUSB0");
+
+    misensor.set_IDLEmode();
+    misensor.set_freq(10);
+    misensor.set_devicetogetgyroacc();
+    misensor.set_streamon();
+    cout << "Calibrating IMU..." << endl;
+    misensor.calibrate();
+    cout << "Calibration done" << endl;
+    double *EulerAngles;
+
+    misensor.set_streamon();
+    double dts=0.02;
+    double f=0;
+
+    SamplingTime Ts(dts);
+
+    double psr = 0.0, isignal1 = 0.0, isignal2 = 0.0, isignal3 = 0.0;
+
+    for(double t=dts;t<3600;t=t+dts){
+        f=f+0.0002;
+        isignal1 = (0.6+sin(2*sin(t)+cos(t)))*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/2;
+        isignal2 = (0.6+sin(2*sin(t+M_PI*2/3)+cos(t+M_PI*2/3)))*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/2;
+        isignal3 = (0.6+sin(2*sin(t+M_PI*4/3)+cos(t+M_PI*4/3)))*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/2;
+//        isignal1 = (1+5*sin(2*sin(t)+cos(t)));
+//        isignal2 = (1+5*sin(2*sin(t+M_PI*2/3)+cos(t+M_PI*2/3)));
+//        isignal3 = (1+5*sin(2*sin(t+M_PI*4/3)+cos(t+M_PI*4/3)));
+        m1.SetPosition(isignal1);
+        m2.SetPosition(isignal2);
+        m3.SetPosition(isignal3);
+        //m2.SetPosition(0);
+        cout << "t: "<< t << ", pos: " << isignal1 << endl;
+        Ts.WaitSamplingTime();
+
+
+        cout<<"Read position: "<<m3.GetPosition()<<", vel: "<<m3.GetVelocity()
+            <<" and those amps:"<<m3.GetAmps()<<endl;
+
+        EulerAngles = misensor.EulerAngles();
+
+        cout << "ROLL: " << EulerAngles[0] << " ; PITCH: "  << EulerAngles[1] << endl;
+
+        data << t << ", "  << isignal1 << ", "<< isignal2 << ", "<< isignal3 << ", "
+             << m1.GetPosition() <<", "<< m1.GetVelocity() <<", "<< m1.GetAmps() <<", "
+             << m2.GetPosition() <<", "<< m2.GetVelocity()<<", "<< m2.GetAmps() <<", "
+             << m3.GetPosition() <<", "<< m3.GetVelocity()<<", "<< m3.GetAmps() <<", "
+             <<  EulerAngles[0] << ", " << EulerAngles[1] << endl;
+    }
+    m1.SetPosition(0);
+    m2.SetPosition(0);
+    m3.SetPosition(0);
+
+
+
+}
+
 void checkbuffersensor(){
 
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
