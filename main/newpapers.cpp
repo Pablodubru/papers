@@ -179,26 +179,28 @@ void capturedata(){
     m3.SwitchOn();
     m3.SetupPositionMode(10,10);
 
-    IMU3DMGX510 misensor("/dev/ttyUSB0");
+    double freq=50; //sensor use values: 50,100,500...
+    IMU3DMGX510 misensor("/dev/ttyUSB0",freq);
 
-    misensor.set_IDLEmode();
-    misensor.set_freq(10);
-    misensor.set_devicetogetgyroacc();
-    misensor.set_streamon();
-    cout << "Calibrating IMU..." << endl;
-    misensor.calibrate();
-    cout << "Calibration done" << endl;
-    double *EulerAngles;
+//    misensor.set_IDLEmode();
+//    misensor.set_freq(10);
+//    misensor.set_devicetogetgyroacc();
+//    misensor.set_streamon();
+//    cout << "Calibrating IMU..." << endl;
+//    misensor.calibrate();
+//    cout << "Calibration done" << endl;
+    double pitch,roll;
+//    double *EulerAngles;
 
     misensor.set_streamon();
-    double dts=0.02;
+    double dts=1/freq;
     double f=0;
 
     SamplingTime Ts(dts);
 
     double psr = 0.0, isignal1 = 0.0, isignal2 = 0.0, isignal3 = 0.0;
 
-    for(double t=dts;t<3600;t=t+dts){
+    for(double t=dts;t<360;t=t+dts){
         f=f+0.0002;
         isignal1 = (0.6+sin(2*sin(t)+cos(t)))*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/2;
         isignal2 = (0.6+sin(2*sin(t+M_PI*2/3)+cos(t+M_PI*2/3)))*abs(3+sin(t/4)+sin(3*t/2+0.32)+sin(t-0.095)+sin(2.56*t)+sin(9*t/5.13+0.09)+sin(7*t/4.2+0.29)+sin(4*t+0.67))/2;
@@ -217,15 +219,16 @@ void capturedata(){
         cout<<"Read position: "<<m3.GetPosition()<<", vel: "<<m3.GetVelocity()
            <<" and those amps:"<<m3.GetAmps()<<endl;
 
-        EulerAngles = misensor.EulerAngles();
+//        EulerAngles = misensor.EulerAngles();
+        misensor.GetPitchRoll(pitch,roll);
 
-        cout << "ROLL: " << EulerAngles[0] << " ; PITCH: "  << EulerAngles[1] << endl;
+        cout << "ROLL: " << pitch << " ; PITCH: "  << roll << endl;
 
         data << t << ", "  << isignal1 << ", "<< isignal2 << ", "<< isignal3 << ", "
              << m1.GetPosition() <<", "<< m1.GetVelocity() <<", "<< m1.GetAmps() <<", "
              << m2.GetPosition() <<", "<< m2.GetVelocity()<<", "<< m2.GetAmps() <<", "
              << m3.GetPosition() <<", "<< m3.GetVelocity()<<", "<< m3.GetAmps() <<", "
-             <<  EulerAngles[0] << ", " << EulerAngles[1] << endl;
+             <<  pitch << ", " << roll << endl;
     }
     m1.SetPosition(0);
     m2.SetPosition(0);
@@ -387,7 +390,7 @@ void testSinTendons(){
 
             cout << "ROLL: " << EulerAngles[0] << " ; PITCH: "  << EulerAngles[1] << endl;
 
-            data << t << ", "  << isignal1 << ", "<< isignal2 << ", "<< isignal3 << ", "
+            data << t << ", "  << signals[1] << ", "<< signals[2] << ", "<< signals[3] << ", "
                  << m1.GetPosition() <<", "<< m1.GetVelocity() <<", "<< m1.GetAmps() <<", "
                  << m2.GetPosition() <<", "<< m2.GetVelocity()<<", "<< m2.GetAmps() <<", "
                  << m3.GetPosition() <<", "<< m3.GetVelocity()<<", "<< m3.GetAmps() <<", "
@@ -476,7 +479,7 @@ void teststepTendons(){
 
             cout << "ROLL: " << EulerAngles[0] << " ; PITCH: "  << EulerAngles[1] << endl;
 
-            data << t << ", "  << isignal1 << ", "<< isignal2 << ", "<< isignal3 << ", "
+            data << t << ", "  << signals[1] << ", "<< signals[2] << ", "<< signals[3] << ", "
                  << m1.GetPosition() <<", "<< m1.GetVelocity() <<", "<< m1.GetAmps() <<", "
                  << m2.GetPosition() <<", "<< m2.GetVelocity()<<", "<< m2.GetAmps() <<", "
                  << m3.GetPosition() <<", "<< m3.GetVelocity()<<", "<< m3.GetAmps() <<", "
@@ -575,8 +578,8 @@ void checkbuffersensor(){
 }
 int main(){
     //teststepTendons();
-    testSinTendons();
+//    testSinTendons();
     //testCircles();
-    //capturedata();
+    capturedata();
 
 }
