@@ -374,7 +374,7 @@ void testSinTendons(){
         signals[3] = -0.5;
         for(double t=dts;t<20;t=t+dts){
             f=f+0.0002;
-            signals[d]=0.5+2*sin(f*t);
+            signals[d]=1.5+3*sin(f*t);
             m1.SetPosition(signals[1]);
             m2.SetPosition(signals[2]);
             m3.SetPosition(signals[3]);
@@ -399,7 +399,7 @@ void testSinTendons(){
         m1.SetPosition(0);
         m2.SetPosition(0);
         m3.SetPosition(0);
-        sleep(3);
+        //sleep(3);
     }
     m1.SetPosition(0);
     m2.SetPosition(0);
@@ -488,7 +488,7 @@ void teststepTendons(){
         m1.SetPosition(0);
         m2.SetPosition(0);
         m3.SetPosition(0);
-        sleep(3);
+        //sleep(3);
     }
     m1.SetPosition(0);
     m2.SetPosition(0);
@@ -578,8 +578,8 @@ void checkbuffersensor(){
 }
 int main(){
     //teststepTendons();
-//    testSinTendons();
-    //testCircles();
-    capturedata();
+    //testSinTendons();
+    testCircles();
+    //capturedata();
 
 }
