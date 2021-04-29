@@ -42,3 +42,6 @@ target_wrapper.*
 # QtCreator CMake
 CMakeLists.txt.user*
 graficas/newpaper/Plot.m
+.DS_Store
+.DS_Store
+graficas/.DS_Store

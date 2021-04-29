@@ -491,7 +491,7 @@ void teststepTendons(){
                  << m1.GetPosition() <<", "<< m1.GetVelocity() <<", "<< m1.GetAmps() <<", "
                  << m2.GetPosition() <<", "<< m2.GetVelocity()<<", "<< m2.GetAmps() <<", "
                  << m3.GetPosition() <<", "<< m3.GetVelocity()<<", "<< m3.GetAmps() <<", "
-                 <<  pitch << ", " << pitch << endl;
+                 <<  roll << ", " << pitch << endl;
         }
         m1.SetPosition(0);
         m2.SetPosition(0);
@@ -585,9 +585,9 @@ void checkbuffersensor(){
 
 }
 int main(){
-    //teststepTendons();
+    teststepTendons();
     //testSinTendons();
-    testCircles();
+    //testCircles();
     //capturedata();
 
 }
