@@ -20,9 +20,9 @@ int main(){
 
 
     //--Can port communications--
-    SocketCanPort pm1("can1");
-    SocketCanPort pm2("can1");
-    SocketCanPort pm3("can1");
+    SocketCanPort pm1("can0");
+    SocketCanPort pm2("can0");
+    SocketCanPort pm3("can0");
 
     CiA402SetupData sd1(2*2048,3.7,0.001, 1.1, 20); //max amp 10.1
     CiA402SetupData sd2(2*2048,3.7,0.001, 1.1, 20); //max amp 10.1
